@@ -3,4 +3,14 @@
     <string name="app_name">StapikCalendarMobile</string>
     <string name="loading">Ładowanie</string>
     <string name="no_entries">—</string>
+    <string name="settings">Ustawienia</string>
+    <string name="menu_connect">Połącz</string>
+    <string name="menu_about">O programie</string>
+    <string name="connect_url_label">Adres serwera</string>
+    <string name="connect_key_label">Klucz API</string>
+    <string name="connect_save">Zapisz</string>
+    <string name="connect_saved_confirmation">Zapisano</string>
+    <string name="about_version_label">Wersja</string>
+    <string name="about_author_label">Autor</string>
+    <string name="about_github_label">Zobacz na GitHubie</string>
 </resources>

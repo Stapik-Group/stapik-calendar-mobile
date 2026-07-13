@@ -8,7 +8,6 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.first
 import java.security.GeneralSecurityException
 import javax.crypto.AEADBadTagException
-import kotlin.text.get
 
 private val Context.apiConfigDataStore by preferencesDataStore(name = "api_config")
 

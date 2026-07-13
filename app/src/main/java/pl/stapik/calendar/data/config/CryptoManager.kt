@@ -1,4 +1,4 @@
-package pl.stapik.calendar.data.config;
+package pl.stapik.calendar.data.config
 
 import android.os.Build
 import android.security.keystore.KeyGenParameterSpec

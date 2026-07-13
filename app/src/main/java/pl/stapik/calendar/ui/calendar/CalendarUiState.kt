@@ -6,6 +6,7 @@ import java.time.YearMonth
 
 sealed interface CalendarUiState {
     data object Loading : CalendarUiState
-    data class Success(val entriesByDay: Map<LocalDate, List<CalendarEntry>>) : CalendarUiState
-    data class Error(val message: String) : CalendarUiState
+    data class Success(val entriesByDay: Map<LocalDate, List<CalendarEntry>>, val isRefreshing: Boolean = false) : CalendarUiState
+    data class Error(val error: CalendarLoadError) : CalendarUiState
+    data object NotConfigured : CalendarUiState
 }

@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.remember
-import pl.stapik.calendar.data.config.InMemoryApiConfigStorage
+import pl.stapik.calendar.data.config.DataStoreApiConfigStorage
 import pl.stapik.calendar.ui.root.AppRoot
 import pl.stapik.calendar.ui.theme.RetroColors
 
@@ -17,7 +17,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val apiConfigStorage = remember { InMemoryApiConfigStorage() }
+            val apiConfigStorage = remember { DataStoreApiConfigStorage(applicationContext) }
             Surface(modifier = Modifier.fillMaxSize(), color = RetroColors.WindowBackground) {
                 AppRoot(apiConfigStorage = apiConfigStorage)
             }

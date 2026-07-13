@@ -50,7 +50,10 @@ fun AppRoot(apiConfigStorage: ApiConfigStorage, modifier: Modifier = Modifier) {
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             when (screen) {
-                AppScreen.Calendar -> WeekPagerScreen()
+                AppScreen.Calendar -> WeekPagerScreen(
+                    apiConfigStorage = apiConfigStorage,
+                    onNavigateToConnect = { screen = AppScreen.Connect }
+                )
                 AppScreen.Connect -> ConnectScreen(storage = apiConfigStorage, onBack = { screen = AppScreen.Calendar })
                 AppScreen.About -> AboutScreen(onBack = { screen = AppScreen.Calendar })
             }

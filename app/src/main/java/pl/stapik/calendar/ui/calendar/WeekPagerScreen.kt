@@ -10,6 +10,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -22,6 +23,7 @@ import pl.stapik.calendar.data.config.ApiConfigStorage
 import pl.stapik.calendar.data.repository.CalendarRepository
 import pl.stapik.calendar.ui.theme.RetroColors
 import pl.stapik.calendar.R
+import pl.stapik.calendar.data.cache.DataStoreCalendarCacheStorage
 import pl.stapik.calendar.ui.theme.retroBevel
 
 @Composable
@@ -29,10 +31,18 @@ fun WeekPagerScreen(
     apiConfigStorage: ApiConfigStorage,
     onNavigateToConnect: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: CalendarViewModel = viewModel(
-        factory = remember { CalendarViewModelFactory(CalendarRepository(apiConfigStorage)) }
-    )
 ) {
+    val context = LocalContext.current
+    val viewModel: CalendarViewModel = viewModel(
+        factory = remember {
+            CalendarViewModelFactory(
+                CalendarRepository(
+                    apiConfigStorage = apiConfigStorage,
+                    cacheStorage = DataStoreCalendarCacheStorage(context.applicationContext)
+                )
+            )
+        }
+    )
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val pagerState = rememberPagerState(initialPage = WeekPaging.INITIAL_PAGE) { WeekPaging.PAGE_COUNT }
     val coroutineScope = rememberCoroutineScope()
@@ -84,17 +94,41 @@ fun WeekPagerScreen(
                 }
 
                 is CalendarUiState.Success -> {
-                    HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
-                        WeekPage(
-                            weekStart = WeekPaging.pageToWeekStart(page),
-                            entriesByDay = current.entriesByDay,
-                            today = today
-                        )
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        if (current.isStale) {
+                            Box(
+                                modifier = Modifier.fillMaxWidth().background(RetroColors.CellBackground).padding(8.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    stringResource(R.string.cached_data_banner, formatCachedTimestamp(current.updatedAt)),
+                                    color = RetroColors.TextDark
+                                )
+                            }
+                        }
+                        HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
+                            WeekPage(
+                                weekStart = WeekPaging.pageToWeekStart(page),
+                                entriesByDay = current.entriesByDay,
+                                today = today
+                            )
+                        }
                     }
                 }
             }
         }
     }
+}
+
+private fun formatCachedTimestamp(updatedAt: String?): String {
+    if (updatedAt == null) return ""
+    return runCatching {
+        val instant = java.time.Instant.parse(updatedAt)
+        java.time.format.DateTimeFormatter
+            .ofLocalizedDateTime(java.time.format.FormatStyle.SHORT)
+            .withZone(java.time.ZoneId.systemDefault())
+            .format(instant)
+    }.getOrDefault(updatedAt)
 }
 
 @Composable

@@ -22,4 +22,5 @@
     <string name="connect_test_success">Połączono jako %1$s</string>
     <string name="connect_scope_warning">Ten klucz ma uprawnienia do zapisu — rozważ użycie dedykowanego klucza tylko-do-odczytu dla tego urządzenia</string>
     <string name="error_not_found">Nie znaleziono kalendarza na serwerze. Sprawdź ustawienia połączenia.</string>
+    <string name="cached_data_banner">Wyświetlam dane z cache z %1$s</string>
 </resources>

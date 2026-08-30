@@ -1,12 +1,14 @@
 package pl.stapik.calendar.ui.calendar
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -26,6 +28,7 @@ fun DayRow(
 ) {
     val locale = LocalConfiguration.current.locales[0]
     val dayFormatter = remember(locale) { DateTimeFormatter.ofPattern("d MMMM", locale) }
+    val uriHandler = LocalUriHandler.current
 
     Column(modifier = modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp)) {
         Row(
@@ -60,11 +63,13 @@ fun DayRow(
         } else {
             Column(modifier = Modifier.fillMaxWidth().background(RetroColors.CellBackgroundOtherMonth)) {
                 entries.forEach { entry ->
+                    val hasLink = entry.link.isNotBlank()
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(8.dp)
                             .background(RetroColors.EntryBlue)
+                            .let { m -> if (hasLink) m.clickable { uriHandler.openUri(entry.link) } else m }
                             .padding(horizontal = 12.dp, vertical = 10.dp)
                     ) {
                         Text(text = entry.name, color = RetroColors.TextOnBlue, fontWeight = FontWeight.Medium)

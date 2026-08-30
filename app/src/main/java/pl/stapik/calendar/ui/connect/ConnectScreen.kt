@@ -3,12 +3,14 @@ package pl.stapik.calendar.ui.connect
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -29,10 +31,8 @@ fun ConnectScreen(
     viewModel: ConnectViewModel = viewModel(factory = remember { ConnectViewModelFactory(storage) })
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-
     Column(modifier = modifier.fillMaxSize().background(RetroColors.WindowBackground)) {
         RetroScreenHeader(title = stringResource(R.string.menu_connect), onBack = onBack)
-
         Column(modifier = Modifier.padding(16.dp)) {
             Text(stringResource(R.string.connect_url_label), color = RetroColors.TextDark)
             OutlinedTextField(
@@ -42,9 +42,7 @@ fun ConnectScreen(
                 singleLine = true,
                 placeholder = { Text("https://twoj-serwer.pl") }
             )
-
             Spacer(modifier = Modifier.height(12.dp))
-
             Text(stringResource(R.string.connect_key_label), color = RetroColors.TextDark)
             OutlinedTextField(
                 value = state.apiKey,
@@ -53,22 +51,40 @@ fun ConnectScreen(
                 singleLine = true,
                 visualTransformation = PasswordVisualTransformation()
             )
-
             Spacer(modifier = Modifier.height(16.dp))
-
             Box(
                 modifier = Modifier
                     .background(RetroColors.CellBackground)
                     .retroBevel(raised = true)
-                    .clickable(onClick = viewModel::onSave)
+                    .clickable(enabled = !state.isTesting, onClick = viewModel::onSave)
                     .padding(horizontal = 24.dp, vertical = 10.dp)
             ) {
-                Text(stringResource(R.string.connect_save), color = RetroColors.TextDark, fontWeight = FontWeight.Bold)
+                if (state.isTesting) {
+                    CircularProgressIndicator(modifier = Modifier.size(16.dp), color = RetroColors.TextDark)
+                } else {
+                    Text(stringResource(R.string.connect_save), color = RetroColors.TextDark, fontWeight = FontWeight.Bold)
+                }
             }
-
-            if (state.isSaved) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(stringResource(R.string.connect_saved_confirmation), color = RetroColors.TextDark)
+            when (val result = state.testResult) {
+                is ConnectTestResult.Success -> {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        stringResource(R.string.connect_test_success, result.keyLabel ?: result.scope),
+                        color = RetroColors.TextDark
+                    )
+                    if (result.scope != "READ_ONLY") {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            stringResource(R.string.connect_scope_warning),
+                            color = Color(0xFFB00020)
+                        )
+                    }
+                }
+                is ConnectTestResult.Error -> {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(result.message, color = Color(0xFFB00020))
+                }
+                null -> Unit
             }
         }
     }

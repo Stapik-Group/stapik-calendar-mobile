@@ -15,7 +15,6 @@ import pl.stapik.calendar.data.repository.MissingConfigException
 import retrofit2.HttpException
 
 class CalendarViewModel(private val repository: CalendarRepository) : ViewModel() {
-
     private val _uiState = MutableStateFlow<CalendarUiState>(CalendarUiState.Loading)
     val uiState: StateFlow<CalendarUiState> = _uiState.asStateFlow()
 
@@ -23,11 +22,10 @@ class CalendarViewModel(private val repository: CalendarRepository) : ViewModel(
         viewModelScope.launch {
             val currentSuccess = _uiState.value as? CalendarUiState.Success
             _uiState.value = currentSuccess?.copy(isRefreshing = true) ?: CalendarUiState.Loading
-
             repository.fetchEntries().fold(
-                onSuccess = { entries ->
+                onSuccess = { result ->
                     _uiState.value = CalendarUiState.Success(
-                        entriesByDay = entries.groupBy { LocalDate.parse(it.date) }
+                        entriesByDay = result.entries.groupBy { LocalDate.parse(it.date) }
                     )
                 },
                 onFailure = { error -> _uiState.value = mapError(error) }
@@ -41,6 +39,7 @@ class CalendarViewModel(private val repository: CalendarRepository) : ViewModel(
             CalendarUiState.Error(CalendarLoadError.NoNetwork)
         is HttpException -> when (error.code()) {
             401, 403 -> CalendarUiState.Error(CalendarLoadError.Unauthorized)
+            404 -> CalendarUiState.Error(CalendarLoadError.NotFound)
             else -> CalendarUiState.Error(CalendarLoadError.Unknown(error.message()))
         }
         else -> CalendarUiState.Error(CalendarLoadError.Unknown(error.message ?: "Unknown error"))

@@ -73,6 +73,7 @@ fun WeekPagerScreen(
                     val message = when (val error = current.error) {
                         CalendarLoadError.NoNetwork -> stringResource(R.string.error_no_network)
                         CalendarLoadError.Unauthorized -> stringResource(R.string.error_unauthorized)
+                        CalendarLoadError.NotFound -> stringResource(R.string.error_not_found)
                         is CalendarLoadError.Unknown -> stringResource(R.string.error_unknown, error.message)
                     }
                     CenteredMessageWithAction(

@@ -18,4 +18,22 @@
     <string name="error_unauthorized">Invalid server URL or API key.</string>
     <string name="error_unknown">Something went wrong: %1$s</string>
     <string name="retry">Retry</string>
+    <string name="connect_test_success">Connected as %1$s</string>
+    <string name="connect_scope_warning">This key has read-write access — consider using a dedicated read-only key for this device</string>
+    <string name="error_not_found">Calendar not found on the server. Check your connection settings.</string>
+    <string name="cached_data_banner">Showing cached data from %1$s</string>
+    <string name="menu_theme">Theme</string>
+    <string name="theme_classic">Classic</string>
+    <string name="theme_classic_pink">Classic Pink</string>
+    <string name="theme_modern">Modern</string>
+    <string name="menu_notifications">Notifications</string>
+    <string name="notifications_toggle_label">Remind me about upcoming entries</string>
+    <string name="notification_channel_name">Entry reminders</string>
+    <string name="notification_channel_description">Notifications about entries happening today or tomorrow</string>
+    <string name="notification_title_today">Today</string>
+    <string name="notification_title_tomorrow">Tomorrow</string>
+    <string name="widget_today">Today</string>
+    <string name="widget_tomorrow">Tomorrow</string>
+    <string name="calendar_widget_name">Stapik Calendar</string>
+    <string name="calendar_widget_description">Today\'s and tomorrow\'s calendar entries</string>
 </resources>

@@ -19,4 +19,22 @@
     <string name="error_unauthorized">Nieprawidłowy adres serwera lub klucz API.</string>
     <string name="error_unknown">Coś poszło nie tak: %1$s</string>
     <string name="retry">Spróbuj ponownie</string>
+    <string name="connect_test_success">Połączono jako %1$s</string>
+    <string name="connect_scope_warning">Ten klucz ma uprawnienia do zapisu — rozważ użycie dedykowanego klucza tylko-do-odczytu dla tego urządzenia</string>
+    <string name="error_not_found">Nie znaleziono kalendarza na serwerze. Sprawdź ustawienia połączenia.</string>
+    <string name="cached_data_banner">Wyświetlam dane z cache z %1$s</string>
+    <string name="menu_theme">Motyw</string>
+    <string name="theme_classic">Klasyczny</string>
+    <string name="theme_classic_pink">Klasyczny róż</string>
+    <string name="theme_modern">Nowoczesny</string>
+    <string name="menu_notifications">Powiadomienia</string>
+    <string name="notifications_toggle_label">Przypominaj o nadchodzących wpisach</string>
+    <string name="notification_channel_name">Przypomnienia o wpisach</string>
+    <string name="notification_channel_description">Powiadomienia o wpisach na dziś i jutro</string>
+    <string name="notification_title_today">Dziś</string>
+    <string name="notification_title_tomorrow">Jutro</string>
+    <string name="widget_today">Dziś</string>
+    <string name="widget_tomorrow">Jutro</string>
+    <string name="calendar_widget_name">Stapik Calendar</string>
+    <string name="calendar_widget_description">Dzisiejsze i jutrzejsze wpisy z kalendarza.</string>
 </resources>

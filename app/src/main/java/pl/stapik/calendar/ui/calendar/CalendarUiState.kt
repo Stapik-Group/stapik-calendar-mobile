@@ -5,7 +5,12 @@ import java.time.LocalDate
 
 sealed interface CalendarUiState {
     data object Loading : CalendarUiState
-    data class Success(val entriesByDay: Map<LocalDate, List<CalendarEntry>>, val isRefreshing: Boolean = false) : CalendarUiState
+    data class Success(
+        val entriesByDay: Map<LocalDate, List<CalendarEntry>>,
+        val isRefreshing: Boolean = false,
+        val isStale: Boolean = false,
+        val updatedAt: String? = null
+    ) : CalendarUiState
     data class Error(val error: CalendarLoadError) : CalendarUiState
     data object NotConfigured : CalendarUiState
 }

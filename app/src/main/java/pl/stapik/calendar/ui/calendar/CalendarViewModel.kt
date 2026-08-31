@@ -10,12 +10,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import pl.stapik.calendar.data.repository.CalendarFetchOutcome
 import pl.stapik.calendar.data.repository.CalendarRepository
 import pl.stapik.calendar.data.repository.MissingConfigException
 import retrofit2.HttpException
 
 class CalendarViewModel(private val repository: CalendarRepository) : ViewModel() {
-
     private val _uiState = MutableStateFlow<CalendarUiState>(CalendarUiState.Loading)
     val uiState: StateFlow<CalendarUiState> = _uiState.asStateFlow()
 
@@ -23,15 +23,25 @@ class CalendarViewModel(private val repository: CalendarRepository) : ViewModel(
         viewModelScope.launch {
             val currentSuccess = _uiState.value as? CalendarUiState.Success
             _uiState.value = currentSuccess?.copy(isRefreshing = true) ?: CalendarUiState.Loading
-
-            repository.fetchEntries().fold(
-                onSuccess = { entries ->
+            when (val outcome = repository.fetchEntries()) {
+                is CalendarFetchOutcome.Fresh -> {
                     _uiState.value = CalendarUiState.Success(
-                        entriesByDay = entries.groupBy { LocalDate.parse(it.date) }
+                        entriesByDay = outcome.result.entries.groupBy { LocalDate.parse(it.date) },
+                        isStale = false,
+                        updatedAt = outcome.result.updatedAt
                     )
-                },
-                onFailure = { error -> _uiState.value = mapError(error) }
-            )
+                }
+                is CalendarFetchOutcome.Cached -> {
+                    _uiState.value = CalendarUiState.Success(
+                        entriesByDay = outcome.cached.entries.groupBy { LocalDate.parse(it.date) },
+                        isStale = true,
+                        updatedAt = outcome.cached.updatedAt
+                    )
+                }
+                is CalendarFetchOutcome.Failure -> {
+                    _uiState.value = mapError(outcome.cause)
+                }
+            }
         }
     }
 
@@ -41,6 +51,7 @@ class CalendarViewModel(private val repository: CalendarRepository) : ViewModel(
             CalendarUiState.Error(CalendarLoadError.NoNetwork)
         is HttpException -> when (error.code()) {
             401, 403 -> CalendarUiState.Error(CalendarLoadError.Unauthorized)
+            404 -> CalendarUiState.Error(CalendarLoadError.NotFound)
             else -> CalendarUiState.Error(CalendarLoadError.Unknown(error.message()))
         }
         else -> CalendarUiState.Error(CalendarLoadError.Unknown(error.message ?: "Unknown error"))

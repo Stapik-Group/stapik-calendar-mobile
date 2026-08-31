@@ -1,61 +1,132 @@
 package pl.stapik.calendar.ui.root
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import pl.stapik.calendar.R
 import pl.stapik.calendar.data.config.ApiConfigStorage
+import pl.stapik.calendar.data.config.ApiSchemaGuard
+import pl.stapik.calendar.data.notifications.NotificationPreferencesStorage
+import pl.stapik.calendar.data.theme.ThemeStorage
+import pl.stapik.calendar.notifications.NotificationScheduler
 import pl.stapik.calendar.ui.about.AboutScreen
 import pl.stapik.calendar.ui.calendar.WeekPagerScreen
 import pl.stapik.calendar.ui.connect.ConnectScreen
 import pl.stapik.calendar.ui.navigation.AppScreen
+import pl.stapik.calendar.ui.notifications.NotificationsScreen
+import pl.stapik.calendar.ui.theme.AppTheme
+import pl.stapik.calendar.ui.theme.EntryPalettes
+import pl.stapik.calendar.ui.theme.LocalEntryPalette
+import pl.stapik.calendar.ui.theme.LocalThemeColors
 import pl.stapik.calendar.ui.theme.RetroColors
+import pl.stapik.calendar.ui.theme.ThemePalettes
+import pl.stapik.calendar.ui.theme.ThemeScreen
 
 @Composable
-fun AppRoot(apiConfigStorage: ApiConfigStorage, modifier: Modifier = Modifier) {
-    var screen by remember { mutableStateOf<AppScreen>(AppScreen.Calendar) }
-    var menuExpanded by remember { mutableStateOf(false) }
+fun AppRoot(
+    apiConfigStorage: ApiConfigStorage,
+    themeStorage: ThemeStorage,
+    notificationPreferencesStorage: NotificationPreferencesStorage,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val apiSchemaGuard = remember { ApiSchemaGuard(context.applicationContext, apiConfigStorage) }
+    var schemaChecked by remember { mutableStateOf(false) }
+    val currentTheme by themeStorage.theme.collectAsState(initial = AppTheme.CLASSIC)
+    val notificationsEnabled by notificationPreferencesStorage.enabled.collectAsState(initial = false)
 
-    Scaffold(
-        modifier = modifier,
-        containerColor = RetroColors.WindowBackground,
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        floatingActionButton = {
-            if (screen == AppScreen.Calendar) {
-                Box(modifier = Modifier.navigationBarsPadding()) {
-                    FloatingActionButton(
-                        onClick = { menuExpanded = true },
-                        containerColor = RetroColors.CellBackground,
-                        contentColor = RetroColors.TextDark
-                    ) {
-                        Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings))
-                    }
-                    DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.menu_connect)) },
-                            onClick = { menuExpanded = false; screen = AppScreen.Connect }
-                        )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.menu_about)) },
-                            onClick = { menuExpanded = false; screen = AppScreen.About }
-                        )
+    LaunchedEffect(notificationsEnabled) {
+        if (notificationsEnabled) {
+            NotificationScheduler.ensureScheduled(context.applicationContext)
+        } else {
+            NotificationScheduler.cancel(context.applicationContext)
+        }
+    }
+
+
+    // Must run before any screen reads the stored config, otherwise a stale
+    // pre-migration config could be used against the new API and fail with a
+    // confusing raw network error instead of a clean redirect to Connect.
+    LaunchedEffect(Unit) {
+        apiSchemaGuard.ensureCurrentSchema()
+        schemaChecked = true
+    }
+
+    if (!schemaChecked) {
+        Box(
+            modifier = modifier.fillMaxSize().background(RetroColors.WindowBackground),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(color = RetroColors.TextDark)
+        }
+        return
+    }
+
+    CompositionLocalProvider(
+        LocalThemeColors provides ThemePalettes.forTheme(currentTheme),
+        LocalEntryPalette provides EntryPalettes.forTheme(currentTheme)
+    ) {
+        val themeColors = LocalThemeColors.current
+        var screen by remember { mutableStateOf<AppScreen>(AppScreen.Calendar) }
+        var menuExpanded by remember { mutableStateOf(false) }
+        BackHandler (enabled = screen != AppScreen.Calendar) {
+            screen = AppScreen.Calendar
+        }
+        Scaffold(
+            modifier = modifier,
+            containerColor = themeColors.windowBackground,
+            contentWindowInsets = WindowInsets(0, 0, 0, 0),
+            floatingActionButton = {
+                if (screen == AppScreen.Calendar) {
+                    Box(modifier = Modifier.navigationBarsPadding()) {
+                        FloatingActionButton(
+                            onClick = { menuExpanded = true },
+                            containerColor = themeColors.cellBackground,
+                            contentColor = themeColors.textDark
+                        ) {
+                            Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings))
+                        }
+                        DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.menu_connect)) },
+                                onClick = { menuExpanded = false; screen = AppScreen.Connect }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.menu_about)) },
+                                onClick = { menuExpanded = false; screen = AppScreen.About }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.menu_theme)) },
+                                onClick = { menuExpanded = false; screen = AppScreen.Theme }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.menu_notifications)) },
+                                onClick = { menuExpanded = false; screen = AppScreen.Notifications }
+                            )
+                        }
                     }
                 }
             }
-        }
-    ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding)) {
-            when (screen) {
-                AppScreen.Calendar -> WeekPagerScreen(
-                    apiConfigStorage = apiConfigStorage,
-                    onNavigateToConnect = { screen = AppScreen.Connect }
-                )
-                AppScreen.Connect -> ConnectScreen(storage = apiConfigStorage, onBack = { screen = AppScreen.Calendar })
-                AppScreen.About -> AboutScreen(onBack = { screen = AppScreen.Calendar })
+        ) { innerPadding ->
+            Box(modifier = Modifier.padding(innerPadding)) {
+                when (screen) {
+                    AppScreen.Calendar -> WeekPagerScreen(
+                        apiConfigStorage = apiConfigStorage,
+                        onNavigateToConnect = { screen = AppScreen.Connect }
+                    )
+                    AppScreen.Connect -> ConnectScreen(storage = apiConfigStorage, onBack = { screen = AppScreen.Calendar })
+                    AppScreen.About -> AboutScreen(onBack = { screen = AppScreen.Calendar })
+                    AppScreen.Theme -> ThemeScreen(storage = themeStorage, onBack = { screen = AppScreen.Calendar })
+                    AppScreen.Notifications -> NotificationsScreen(storage = notificationPreferencesStorage, onBack = { screen = AppScreen.Calendar })
+                }
             }
         }
     }

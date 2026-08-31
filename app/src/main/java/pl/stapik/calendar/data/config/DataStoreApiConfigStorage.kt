@@ -49,6 +49,10 @@ class DataStoreApiConfigStorage(
         }
     }
 
+    override suspend fun clear() {
+        context.apiConfigDataStore.edit { it.clear() }
+    }
+
     private companion object {
         const val TAG = "DataStoreApiConfigStorage"
         val KEY_URL_CIPHER = stringPreferencesKey("base_url_cipher")

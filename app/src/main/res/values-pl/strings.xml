@@ -23,4 +23,8 @@
     <string name="connect_scope_warning">Ten klucz ma uprawnienia do zapisu — rozważ użycie dedykowanego klucza tylko-do-odczytu dla tego urządzenia</string>
     <string name="error_not_found">Nie znaleziono kalendarza na serwerze. Sprawdź ustawienia połączenia.</string>
     <string name="cached_data_banner">Wyświetlam dane z cache z %1$s</string>
+    <string name="menu_theme">Motyw</string>
+    <string name="theme_classic">Klasyczny</string>
+    <string name="theme_classic_pink">Klasyczny róż</string>
+    <string name="theme_modern">Nowoczesny</string>
 </resources>

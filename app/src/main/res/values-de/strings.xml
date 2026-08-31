@@ -23,5 +23,9 @@
     <string name="connect_scope_warning">Dieser Schlüssel hat Schreibzugriff — verwende für dieses Gerät idealerweise einen dedizierten Nur-Lese-Schlüssel</string>
     <string name="error_not_found">Kalender wurde auf dem Server nicht gefunden. Überprüfe die Verbindungseinstellungen.</string>
     <string name="cached_data_banner">Zeige zwischengespeicherte Daten vom %1$s</string>
+    <string name="menu_theme">Design</string>
+    <string name="theme_classic">Klassisch</string>
+    <string name="theme_classic_pink">Klassisch Pink</string>
+    <string name="theme_modern">Modern</string>
 
 </resources>

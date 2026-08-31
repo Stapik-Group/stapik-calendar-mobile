@@ -13,17 +13,29 @@ import androidx.compose.ui.res.stringResource
 import pl.stapik.calendar.R
 import pl.stapik.calendar.data.config.ApiConfigStorage
 import pl.stapik.calendar.data.config.ApiSchemaGuard
+import pl.stapik.calendar.data.theme.ThemeStorage
 import pl.stapik.calendar.ui.about.AboutScreen
 import pl.stapik.calendar.ui.calendar.WeekPagerScreen
 import pl.stapik.calendar.ui.connect.ConnectScreen
 import pl.stapik.calendar.ui.navigation.AppScreen
+import pl.stapik.calendar.ui.theme.AppTheme
+import pl.stapik.calendar.ui.theme.EntryPalettes
+import pl.stapik.calendar.ui.theme.LocalEntryPalette
+import pl.stapik.calendar.ui.theme.LocalThemeColors
 import pl.stapik.calendar.ui.theme.RetroColors
+import pl.stapik.calendar.ui.theme.ThemePalettes
+import pl.stapik.calendar.ui.theme.ThemeScreen
 
 @Composable
-fun AppRoot(apiConfigStorage: ApiConfigStorage, modifier: Modifier = Modifier) {
+fun AppRoot(
+    apiConfigStorage: ApiConfigStorage,
+    themeStorage: ThemeStorage,
+    modifier: Modifier = Modifier
+) {
     val context = LocalContext.current
     val apiSchemaGuard = remember { ApiSchemaGuard(context.applicationContext, apiConfigStorage) }
     var schemaChecked by remember { mutableStateOf(false) }
+    val currentTheme by themeStorage.theme.collectAsState(initial = AppTheme.CLASSIC)
 
     // Must run before any screen reads the stored config, otherwise a stale
     // pre-migration config could be used against the new API and fail with a
@@ -43,44 +55,55 @@ fun AppRoot(apiConfigStorage: ApiConfigStorage, modifier: Modifier = Modifier) {
         return
     }
 
-    var screen by remember { mutableStateOf<AppScreen>(AppScreen.Calendar) }
-    var menuExpanded by remember { mutableStateOf(false) }
-    Scaffold(
-        modifier = modifier,
-        containerColor = RetroColors.WindowBackground,
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        floatingActionButton = {
-            if (screen == AppScreen.Calendar) {
-                Box(modifier = Modifier.navigationBarsPadding()) {
-                    FloatingActionButton(
-                        onClick = { menuExpanded = true },
-                        containerColor = RetroColors.CellBackground,
-                        contentColor = RetroColors.TextDark
-                    ) {
-                        Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings))
-                    }
-                    DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.menu_connect)) },
-                            onClick = { menuExpanded = false; screen = AppScreen.Connect }
-                        )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.menu_about)) },
-                            onClick = { menuExpanded = false; screen = AppScreen.About }
-                        )
+    CompositionLocalProvider(
+        LocalThemeColors provides ThemePalettes.forTheme(currentTheme),
+        LocalEntryPalette provides EntryPalettes.forTheme(currentTheme)
+    ) {
+        val themeColors = LocalThemeColors.current
+        var screen by remember { mutableStateOf<AppScreen>(AppScreen.Calendar) }
+        var menuExpanded by remember { mutableStateOf(false) }
+        Scaffold(
+            modifier = modifier,
+            containerColor = themeColors.windowBackground,
+            contentWindowInsets = WindowInsets(0, 0, 0, 0),
+            floatingActionButton = {
+                if (screen == AppScreen.Calendar) {
+                    Box(modifier = Modifier.navigationBarsPadding()) {
+                        FloatingActionButton(
+                            onClick = { menuExpanded = true },
+                            containerColor = themeColors.cellBackground,
+                            contentColor = themeColors.textDark
+                        ) {
+                            Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings))
+                        }
+                        DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.menu_connect)) },
+                                onClick = { menuExpanded = false; screen = AppScreen.Connect }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.menu_about)) },
+                                onClick = { menuExpanded = false; screen = AppScreen.About }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.menu_theme)) },
+                                onClick = { menuExpanded = false; screen = AppScreen.Theme }
+                            )
+                        }
                     }
                 }
             }
-        }
-    ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding)) {
-            when (screen) {
-                AppScreen.Calendar -> WeekPagerScreen(
-                    apiConfigStorage = apiConfigStorage,
-                    onNavigateToConnect = { screen = AppScreen.Connect }
-                )
-                AppScreen.Connect -> ConnectScreen(storage = apiConfigStorage, onBack = { screen = AppScreen.Calendar })
-                AppScreen.About -> AboutScreen(onBack = { screen = AppScreen.Calendar })
+        ) { innerPadding ->
+            Box(modifier = Modifier.padding(innerPadding)) {
+                when (screen) {
+                    AppScreen.Calendar -> WeekPagerScreen(
+                        apiConfigStorage = apiConfigStorage,
+                        onNavigateToConnect = { screen = AppScreen.Connect }
+                    )
+                    AppScreen.Connect -> ConnectScreen(storage = apiConfigStorage, onBack = { screen = AppScreen.Calendar })
+                    AppScreen.About -> AboutScreen(onBack = { screen = AppScreen.Calendar })
+                    AppScreen.Theme -> ThemeScreen(storage = themeStorage, onBack = { screen = AppScreen.Calendar })
+                }
             }
         }
     }

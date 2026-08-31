@@ -1,5 +1,6 @@
 package pl.stapik.calendar.ui.root
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -62,6 +63,9 @@ fun AppRoot(
         val themeColors = LocalThemeColors.current
         var screen by remember { mutableStateOf<AppScreen>(AppScreen.Calendar) }
         var menuExpanded by remember { mutableStateOf(false) }
+        BackHandler (enabled = screen != AppScreen.Calendar) {
+            screen = AppScreen.Calendar
+        }
         Scaffold(
             modifier = modifier,
             containerColor = themeColors.windowBackground,

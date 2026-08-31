@@ -6,5 +6,6 @@ import kotlinx.serialization.Serializable
 data class CalendarEntry (
     val date: String, // ISO 8601 yyyy-MM-dd
     val name: String,
-    val link: String = ""
+    val link: String = "",
+    val color: String = "default"
 )

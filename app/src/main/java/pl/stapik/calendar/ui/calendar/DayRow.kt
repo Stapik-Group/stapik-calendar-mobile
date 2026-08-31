@@ -14,6 +14,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import pl.stapik.calendar.R
 import pl.stapik.calendar.data.model.CalendarEntry
+import pl.stapik.calendar.ui.theme.EntryColors
 import pl.stapik.calendar.ui.theme.RetroColors
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -68,7 +69,7 @@ fun DayRow(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(8.dp)
-                            .background(RetroColors.EntryBlue)
+                            .background(EntryColors.forKey(entry.color))
                             .let { m -> if (hasLink) m.clickable { uriHandler.openUri(entry.link) } else m }
                             .padding(horizontal = 12.dp, vertical = 10.dp)
                     ) {

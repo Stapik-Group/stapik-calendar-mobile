@@ -32,4 +32,8 @@
     <string name="notification_channel_description">Notifications about entries happening today or tomorrow</string>
     <string name="notification_title_today">Today</string>
     <string name="notification_title_tomorrow">Tomorrow</string>
+    <string name="widget_today">Today</string>
+    <string name="widget_tomorrow">Tomorrow</string>
+    <string name="calendar_widget_name">Stapik Calendar</string>
+    <string name="calendar_widget_description">Today\'s and tomorrow\'s calendar entries</string>
 </resources>

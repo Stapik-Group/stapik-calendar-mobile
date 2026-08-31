@@ -63,6 +63,8 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.retrofit.kotlinx.serialization.converter)
     implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.glance)
+    implementation(libs.androidx.glance.appwidget)
 
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))

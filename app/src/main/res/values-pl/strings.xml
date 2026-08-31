@@ -33,4 +33,8 @@
     <string name="notification_channel_description">Powiadomienia o wpisach na dziś i jutro</string>
     <string name="notification_title_today">Dziś</string>
     <string name="notification_title_tomorrow">Jutro</string>
+    <string name="widget_today">Dziś</string>
+    <string name="widget_tomorrow">Jutro</string>
+    <string name="calendar_widget_name">Stapik Calendar</string>
+    <string name="calendar_widget_description">Dzisiejsze i jutrzejsze wpisy z kalendarza.</string>
 </resources>

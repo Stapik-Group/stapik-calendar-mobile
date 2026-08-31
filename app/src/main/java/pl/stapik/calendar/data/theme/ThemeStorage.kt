@@ -4,9 +4,11 @@ import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import androidx.glance.appwidget.updateAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import pl.stapik.calendar.ui.theme.AppTheme
+import pl.stapik.calendar.ui.widget.CalendarWidget
 
 private val Context.themeDataStore by preferencesDataStore(name = "app_theme")
 
@@ -22,6 +24,7 @@ class DataStoreThemeStorage(private val context: Context) : ThemeStorage {
 
     override suspend fun setTheme(theme: AppTheme) {
         context.themeDataStore.edit { it[KEY_THEME] = theme.name }
+        CalendarWidget().updateAll(context.applicationContext)
     }
 
     private companion object {

@@ -14,11 +14,14 @@ import androidx.compose.ui.res.stringResource
 import pl.stapik.calendar.R
 import pl.stapik.calendar.data.config.ApiConfigStorage
 import pl.stapik.calendar.data.config.ApiSchemaGuard
+import pl.stapik.calendar.data.notifications.NotificationPreferencesStorage
 import pl.stapik.calendar.data.theme.ThemeStorage
+import pl.stapik.calendar.notifications.NotificationScheduler
 import pl.stapik.calendar.ui.about.AboutScreen
 import pl.stapik.calendar.ui.calendar.WeekPagerScreen
 import pl.stapik.calendar.ui.connect.ConnectScreen
 import pl.stapik.calendar.ui.navigation.AppScreen
+import pl.stapik.calendar.ui.notifications.NotificationsScreen
 import pl.stapik.calendar.ui.theme.AppTheme
 import pl.stapik.calendar.ui.theme.EntryPalettes
 import pl.stapik.calendar.ui.theme.LocalEntryPalette
@@ -31,12 +34,23 @@ import pl.stapik.calendar.ui.theme.ThemeScreen
 fun AppRoot(
     apiConfigStorage: ApiConfigStorage,
     themeStorage: ThemeStorage,
+    notificationPreferencesStorage: NotificationPreferencesStorage,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     val apiSchemaGuard = remember { ApiSchemaGuard(context.applicationContext, apiConfigStorage) }
     var schemaChecked by remember { mutableStateOf(false) }
     val currentTheme by themeStorage.theme.collectAsState(initial = AppTheme.CLASSIC)
+    val notificationsEnabled by notificationPreferencesStorage.enabled.collectAsState(initial = false)
+
+    LaunchedEffect(notificationsEnabled) {
+        if (notificationsEnabled) {
+            NotificationScheduler.ensureScheduled(context.applicationContext)
+        } else {
+            NotificationScheduler.cancel(context.applicationContext)
+        }
+    }
+
 
     // Must run before any screen reads the stored config, otherwise a stale
     // pre-migration config could be used against the new API and fail with a
@@ -93,6 +107,10 @@ fun AppRoot(
                                 text = { Text(stringResource(R.string.menu_theme)) },
                                 onClick = { menuExpanded = false; screen = AppScreen.Theme }
                             )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.menu_notifications)) },
+                                onClick = { menuExpanded = false; screen = AppScreen.Notifications }
+                            )
                         }
                     }
                 }
@@ -107,6 +125,7 @@ fun AppRoot(
                     AppScreen.Connect -> ConnectScreen(storage = apiConfigStorage, onBack = { screen = AppScreen.Calendar })
                     AppScreen.About -> AboutScreen(onBack = { screen = AppScreen.Calendar })
                     AppScreen.Theme -> ThemeScreen(storage = themeStorage, onBack = { screen = AppScreen.Calendar })
+                    AppScreen.Notifications -> NotificationsScreen(storage = notificationPreferencesStorage, onBack = { screen = AppScreen.Calendar })
                 }
             }
         }

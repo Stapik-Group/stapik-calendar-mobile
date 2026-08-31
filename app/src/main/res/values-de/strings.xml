@@ -27,5 +27,11 @@
     <string name="theme_classic">Klassisch</string>
     <string name="theme_classic_pink">Klassisch Pink</string>
     <string name="theme_modern">Modern</string>
+    <string name="menu_notifications">Benachrichtigungen</string>
+    <string name="notifications_toggle_label">Erinnere mich an bevorstehende Einträge</string>
+    <string name="notification_channel_name">Eintrags-Erinnerungen</string>
+    <string name="notification_channel_description">Benachrichtigungen zu Einträgen für heute und morgen</string>
+    <string name="notification_title_today">Heute</string>
+    <string name="notification_title_tomorrow">Morgen</string>
 
 </resources>

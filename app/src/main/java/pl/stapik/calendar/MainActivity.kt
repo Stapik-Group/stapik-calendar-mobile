@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.remember
 import pl.stapik.calendar.data.config.DataStoreApiConfigStorage
+import pl.stapik.calendar.data.notifications.DataStoreNotificationPreferencesStorage
 import pl.stapik.calendar.data.theme.DataStoreThemeStorage
 import pl.stapik.calendar.ui.root.AppRoot
 import pl.stapik.calendar.ui.theme.RetroColors
@@ -20,9 +21,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             val apiConfigStorage = remember { DataStoreApiConfigStorage(applicationContext) }
             val themeStorage = remember { DataStoreThemeStorage(applicationContext) }
+            val notificationPreferencesStorage = remember { DataStoreNotificationPreferencesStorage(applicationContext) }
 
             Surface(modifier = Modifier.fillMaxSize(), color = RetroColors.WindowBackground) {
-                AppRoot(apiConfigStorage = apiConfigStorage, themeStorage = themeStorage)
+                AppRoot(apiConfigStorage = apiConfigStorage, themeStorage = themeStorage, notificationPreferencesStorage = notificationPreferencesStorage)
             }
         }
     }

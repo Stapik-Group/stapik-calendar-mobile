@@ -5,4 +5,5 @@ sealed interface AppScreen {
     data object Connect: AppScreen
     data object About: AppScreen
     data object Theme: AppScreen
+    data object Notifications: AppScreen
 }

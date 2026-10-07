@@ -21,10 +21,10 @@ import java.time.LocalDate
 import kotlinx.coroutines.launch
 import pl.stapik.calendar.data.config.ApiConfigStorage
 import pl.stapik.calendar.data.repository.CalendarRepository
-import pl.stapik.calendar.ui.theme.RetroColors
+import pl.stapik.calendar.ui.theme.LocalThemeColors
+import pl.stapik.calendar.ui.theme.themedSurface
 import pl.stapik.calendar.R
 import pl.stapik.calendar.data.cache.DataStoreCalendarCacheStorage
-import pl.stapik.calendar.ui.theme.retroBevel
 
 @Composable
 fun WeekPagerScreen(
@@ -47,10 +47,11 @@ fun WeekPagerScreen(
     val pagerState = rememberPagerState(initialPage = WeekPaging.INITIAL_PAGE) { WeekPaging.PAGE_COUNT }
     val coroutineScope = rememberCoroutineScope()
     val today = remember { LocalDate.now() }
+    val themeColors = LocalThemeColors.current
 
     LaunchedEffect(Unit) { viewModel.refresh() }
 
-    Column(modifier = modifier.fillMaxSize().background(RetroColors.WindowBackground)) {
+    Column(modifier = modifier.fillMaxSize().background(themeColors.windowBackground)) {
         val currentWeekStart = WeekPaging.pageToWeekStart(pagerState.currentPage)
 
         WeekNavBar(
@@ -97,12 +98,12 @@ fun WeekPagerScreen(
                     Column(modifier = Modifier.fillMaxSize()) {
                         if (current.isStale) {
                             Box(
-                                modifier = Modifier.fillMaxWidth().background(RetroColors.CellBackground).padding(8.dp),
+                                modifier = Modifier.fillMaxWidth().background(themeColors.cellBackground).padding(8.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
                                     stringResource(R.string.cached_data_banner, formatCachedTimestamp(current.updatedAt)),
-                                    color = RetroColors.TextDark
+                                    color = themeColors.textDark
                                 )
                             }
                         }
@@ -133,8 +134,9 @@ private fun formatCachedTimestamp(updatedAt: String?): String {
 
 @Composable
 private fun CenteredMessage(text: String, modifier: Modifier = Modifier) {
+    val themeColors = LocalThemeColors.current
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text, color = RetroColors.TextDark)
+        Text(text, color = themeColors.textDark)
     }
 }
 
@@ -145,18 +147,18 @@ private fun CenteredMessageWithAction(
     onAction: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val themeColors = LocalThemeColors.current
     Box(modifier = modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(message, color = RetroColors.TextDark)
+            Text(message, color = themeColors.textDark)
             Spacer(modifier = Modifier.height(12.dp))
             Box(
                 modifier = Modifier
-                    .background(RetroColors.CellBackground)
-                    .retroBevel(raised = true)
+                    .themedSurface(themeColors = themeColors, backgroundColor = themeColors.cellBackground, raised = true)
                     .clickable(onClick = onAction)
                     .padding(horizontal = 20.dp, vertical = 10.dp)
             ) {
-                Text(actionLabel, color = RetroColors.TextDark, fontWeight = FontWeight.Bold)
+                Text(actionLabel, color = themeColors.textDark, fontWeight = FontWeight.Bold)
             }
         }
     }

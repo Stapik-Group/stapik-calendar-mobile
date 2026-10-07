@@ -31,6 +31,7 @@ fun ThemeScreen(storage: ThemeStorage, onBack: () -> Unit, modifier: Modifier = 
                     AppTheme.CLASSIC -> stringResource(R.string.theme_classic)
                     AppTheme.MODERN -> stringResource(R.string.theme_modern)
                     AppTheme.CLASSIC_PINK -> stringResource(R.string.theme_classic_pink)
+                    AppTheme.DARK -> stringResource(R.string.theme_dark)
                 }
                 val isSelected = theme == currentTheme
                 Box(

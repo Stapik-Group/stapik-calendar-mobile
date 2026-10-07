@@ -1,38 +1,48 @@
 package pl.stapik.calendar.notifications
 
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.content.Context
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.PeriodicWorkRequestBuilder
+import android.content.Intent
+import android.os.Build
 import androidx.work.WorkManager
-import java.time.Duration
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.ZoneId
 
 object NotificationScheduler {
-    private const val UNIQUE_WORK_NAME = "entry_reminder_check"
-    private val TARGET_HOUR: LocalTime = LocalTime.of(8, 0)
+    private const val LEGACY_WORK_NAME = "entry_reminder_check"
+    private const val ALARM_REQUEST_CODE = 1
+    private val TARGET_TIME: LocalTime = LocalTime.of(8, 0)
 
-    // Called from AppRoot whenever the stored preference is true - KEEP policy
-    // makes this a cheap no-op if the periodic work is already scheduled, so
-    // it is safe to call unconditionally on every app launch.
-    fun ensureScheduled(context: Context) {
-        val now = LocalDateTime.now()
-        val nextTarget = now.toLocalDate().atTime(TARGET_HOUR)
-            .let { if (it.isAfter(now)) it else it.plusDays(1) }
-        val initialDelay = Duration.between(now, nextTarget)
+    fun ensureScheduled(context: Context, from: LocalDateTime = LocalDateTime.now()) {
+        WorkManager.getInstance(context).cancelUniqueWork(LEGACY_WORK_NAME)
 
-        val request = PeriodicWorkRequestBuilder<EntryReminderWorker>(Duration.ofDays(1))
-            .setInitialDelay(initialDelay)
-            .build()
+        val nextTarget = from.toLocalDate().atTime(TARGET_TIME)
+            .let { if (it.isAfter(from)) it else it.plusDays(1) }
+        val triggerAtMillis = nextTarget.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
 
-        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
-            UNIQUE_WORK_NAME,
-            ExistingPeriodicWorkPolicy.KEEP,
-            request
-        )
+        val alarmManager = context.getSystemService(AlarmManager::class.java)
+        val canScheduleExact = Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
+            alarmManager.canScheduleExactAlarms()
+        val pendingIntent = alarmIntent(context)
+
+        if (canScheduleExact) {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent)
+        } else {
+            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent)
+        }
     }
 
     fun cancel(context: Context) {
-        WorkManager.getInstance(context).cancelUniqueWork(UNIQUE_WORK_NAME)
+        WorkManager.getInstance(context).cancelUniqueWork(LEGACY_WORK_NAME)
+        context.getSystemService(AlarmManager::class.java).cancel(alarmIntent(context))
     }
+
+    private fun alarmIntent(context: Context): PendingIntent = PendingIntent.getBroadcast(
+        context,
+        ALARM_REQUEST_CODE,
+        Intent(context, ReminderAlarmReceiver::class.java),
+        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+    )
 }

@@ -109,7 +109,7 @@ private fun CalendarWidgetContent(
             items = todayEntries,
             itemId = { entry -> entryId(entry) }
         ) { entry ->
-            CalendarEntryRow(entry, themeColors)
+            CalendarEntryRow(entry, themeColors, appAction)
         }
 
         if (todayEntries.isNotEmpty()) {
@@ -131,7 +131,7 @@ private fun CalendarWidgetContent(
             items = tomorrowEntries,
             itemId = { entry -> entryId(entry) }
         ) { entry ->
-            CalendarEntryRow(entry, themeColors)
+            CalendarEntryRow(entry, themeColors, appAction)
         }
     }
 }
@@ -186,23 +186,19 @@ private fun DateHeader(
 @Composable
 private fun CalendarEntryRow(
     entry: CalendarEntry,
-    themeColors: ThemeColors
+    themeColors: ThemeColors,
+    action: androidx.glance.action.Action
 ) {
     val modifier = GlanceModifier
         .fillMaxWidth()
+        .clickable(action)
         .padding(horizontal = 10.dp, vertical = 7.dp)
 
     Column(
         modifier = GlanceModifier.fillMaxWidth()
     ) {
         Row(
-            modifier = if (entry.link.isNotBlank()) {
-                modifier.clickable(
-                    actionStartActivity<OpenLinkActivity>()
-                )
-            } else {
-                modifier
-            },
+            modifier = modifier,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(

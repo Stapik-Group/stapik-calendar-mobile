@@ -1,5 +1,8 @@
 package pl.stapik.calendar.ui.theme
 
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -17,7 +20,8 @@ data class ThemeColors(
     val borderLight: Color,
     val borderDark: Color,
     val usesBevel: Boolean,
-    val cornerRadius: Dp
+    val cornerRadius: Dp,
+    val isDark: Boolean = false
 )
 
 object ThemePalettes {
@@ -69,9 +73,44 @@ object ThemePalettes {
         cornerRadius = 12.dp
     )
 
+    val Dark = ThemeColors(
+        windowBackground = Color(0xFF000000),
+        cellBackground = Color(0xFF1C1C1E),
+        cellBackgroundSecondary = Color(0xFF111113),
+        accent = Color(0xFF0A84FF),
+        todayBackground = Color(0xFF0A2A4D),
+        todayText = Color(0xFF64B5FF),
+        textOnAccent = Color(0xFFFFFFFF),
+        textDark = Color(0xFFF2F2F7),
+        textMuted = Color(0xFF8E8E93),
+        borderLight = Color(0xFF38383A),
+        borderDark = Color(0xFF2C2C2E),
+        usesBevel = false,
+        cornerRadius = 12.dp,
+        isDark = true
+    )
+
     fun forTheme(theme: AppTheme): ThemeColors = when (theme) {
         AppTheme.CLASSIC -> Classic
         AppTheme.MODERN -> Modern
         AppTheme.CLASSIC_PINK -> ClassicPink
+        AppTheme.DARK -> Dark
     }
+}
+
+fun ThemeColors.toMaterialColorScheme(): ColorScheme = if (isDark) {
+    darkColorScheme(
+        primary = accent,
+        onPrimary = textOnAccent,
+        background = windowBackground,
+        onBackground = textDark,
+        surface = cellBackground,
+        onSurface = textDark,
+        surfaceVariant = cellBackgroundSecondary,
+        onSurfaceVariant = textMuted,
+        outline = borderLight,
+        outlineVariant = borderDark
+    )
+} else {
+    lightColorScheme()
 }

@@ -27,6 +27,7 @@
     <string name="theme_classic">Klasyczny</string>
     <string name="theme_classic_pink">Klasyczny róż</string>
     <string name="theme_modern">Nowoczesny</string>
+    <string name="theme_dark">Ciemny</string>
     <string name="menu_notifications">Powiadomienia</string>
     <string name="notifications_toggle_label">Przypominaj o nadchodzących wpisach</string>
     <string name="notification_channel_name">Przypomnienia o wpisach</string>

@@ -1,5 +1,6 @@
 package pl.stapik.calendar.data.repository
 
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import pl.stapik.calendar.data.cache.CalendarCacheStorage
 import pl.stapik.calendar.data.config.ApiConfigStorage
@@ -26,7 +27,7 @@ class CalendarRepository(
             val api = NetworkModule.createApi(baseUrl = config.baseUrl)
             val document = api.getDocument(slotKey = SLOT_KEY, apiKey = config.apiKey)
             val syncEnvelope = json.decodeFromString<CalendarSyncEnvelope>(document.content)
-            CalendarFetchResult(entries = syncEnvelope.payload, updatedAt = document.updatedAt)
+            CalendarFetchResult(entries = syncEnvelope.payload.entries, updatedAt = document.updatedAt)
         }
 
         networkResult.onSuccess { result ->
@@ -37,7 +38,7 @@ class CalendarRepository(
             onSuccess = { CalendarFetchOutcome.Fresh(it) },
             onFailure = { error ->
                 // Not configured should go straight to the Connect prompt, not a stale cache.
-                if (error is MissingConfigException) {
+                if (error is MissingConfigException || error is SerializationException) {
                     CalendarFetchOutcome.Failure(error)
                 } else {
                     val cached = cacheStorage.load()

@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.glance.appwidget.updateAll
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import java.time.LocalDate
@@ -16,6 +17,7 @@ import pl.stapik.calendar.data.config.DataStoreApiConfigStorage
 import pl.stapik.calendar.data.notifications.DataStoreNotificationPreferencesStorage
 import pl.stapik.calendar.data.repository.CalendarFetchOutcome
 import pl.stapik.calendar.data.repository.CalendarRepository
+import pl.stapik.calendar.ui.widget.CalendarWidget
 
 class EntryReminderWorker(
     context: Context,
@@ -36,6 +38,8 @@ class EntryReminderWorker(
             is CalendarFetchOutcome.Cached -> outcome.cached.entries
             is CalendarFetchOutcome.Failure -> return Result.retry()
         }
+
+        CalendarWidget().updateAll(applicationContext)
 
         val today = LocalDate.now()
         val tomorrow = today.plusDays(1)

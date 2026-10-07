@@ -13,6 +13,7 @@ import pl.stapik.calendar.data.notifications.DataStoreNotificationPreferencesSto
 import pl.stapik.calendar.data.theme.DataStoreThemeStorage
 import pl.stapik.calendar.ui.root.AppRoot
 import pl.stapik.calendar.ui.theme.RetroColors
+import pl.stapik.calendar.ui.widget.WidgetRefreshScheduler
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,5 +28,10 @@ class MainActivity : ComponentActivity() {
                 AppRoot(apiConfigStorage = apiConfigStorage, themeStorage = themeStorage, notificationPreferencesStorage = notificationPreferencesStorage)
             }
         }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        WidgetRefreshScheduler.refreshNow(applicationContext)
     }
 }

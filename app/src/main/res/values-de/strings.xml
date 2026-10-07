@@ -27,6 +27,7 @@
     <string name="theme_classic">Klassisch</string>
     <string name="theme_classic_pink">Klassisch Pink</string>
     <string name="theme_modern">Modern</string>
+    <string name="theme_dark">Dunkel</string>
     <string name="menu_notifications">Benachrichtigungen</string>
     <string name="notifications_toggle_label">Erinnere mich an bevorstehende Einträge</string>
     <string name="notification_channel_name">Eintrags-Erinnerungen</string>

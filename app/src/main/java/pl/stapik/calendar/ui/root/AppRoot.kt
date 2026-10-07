@@ -26,7 +26,6 @@ import pl.stapik.calendar.ui.theme.AppTheme
 import pl.stapik.calendar.ui.theme.EntryPalettes
 import pl.stapik.calendar.ui.theme.LocalEntryPalette
 import pl.stapik.calendar.ui.theme.LocalThemeColors
-import pl.stapik.calendar.ui.theme.RetroColors
 import pl.stapik.calendar.ui.theme.ThemePalettes
 import pl.stapik.calendar.ui.theme.ThemeScreen
 
@@ -61,11 +60,12 @@ fun AppRoot(
     }
 
     if (!schemaChecked) {
+        val splashColors = ThemePalettes.forTheme(currentTheme)
         Box(
-            modifier = modifier.fillMaxSize().background(RetroColors.WindowBackground),
+            modifier = modifier.fillMaxSize().background(splashColors.windowBackground),
             contentAlignment = Alignment.Center
         ) {
-            CircularProgressIndicator(color = RetroColors.TextDark)
+            CircularProgressIndicator(color = splashColors.textDark)
         }
         return
     }

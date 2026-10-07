@@ -34,10 +34,20 @@ object EntryPalettes {
         whiteTextKeys = setOf("red", "green", "blue", "purple", "orange", "teal", "pink", "brown", "gray")
     )
 
+    val Dark = build(
+        default = ThemePalettes.Dark.accent,
+        darkText = ThemePalettes.Dark.textDark,
+        red = 0xFFFF453A, green = 0xFF30D158, blue = 0xFF0A84FF,
+        yellow = 0xFFFFD60A, purple = 0xFFBF5AF2, orange = 0xFFFF9F0A,
+        teal = 0xFF40C8E0, pink = 0xFFFF375F, brown = 0xFFAC8E68, gray = 0xFF98989D,
+        whiteTextKeys = setOf("red", "blue", "purple", "pink", "brown", "gray")
+    )
+
     fun forTheme(theme: AppTheme): Map<String, EntryColorDef> = when (theme) {
         AppTheme.CLASSIC -> Classic
         AppTheme.MODERN -> Modern
         AppTheme.CLASSIC_PINK -> ClassicPink
+        AppTheme.DARK -> Dark
     }
 
     private fun build(

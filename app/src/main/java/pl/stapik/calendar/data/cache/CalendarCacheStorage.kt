@@ -11,5 +11,6 @@ data class CachedCalendar(
     val entries: List<CalendarEntry>,
     val updatedAt: String,
     val dirty: Boolean = false,
-    val scope: String? = null
+    val scope: String? = null,
+    val modifiedAt: String? = null
 )

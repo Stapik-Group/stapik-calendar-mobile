@@ -16,7 +16,6 @@ import pl.stapik.calendar.data.model.CalendarSyncEnvelope
 import pl.stapik.calendar.data.model.DocumentResponse
 import pl.stapik.calendar.data.model.DocumentWriteRequest
 import pl.stapik.calendar.data.network.NetworkModule
-import retrofit2.HttpException
 
 data class CalendarFetchResult(
     val entries: List<CalendarEntry>,
@@ -32,7 +31,6 @@ class CalendarRepository(
 ) {
     private val json = Json { ignoreUnknownKeys = true }
     private val writeJson = Json { ignoreUnknownKeys = true; encodeDefaults = true }
-    private val lock = Mutex()
 
     suspend fun fetchEntries(resolution: SyncResolution = SyncResolution.NONE): CalendarFetchOutcome =
         lock.withLock { sync(resolution) }
@@ -49,7 +47,8 @@ class CalendarRepository(
                 entries = entries,
                 updatedAt = cached?.updatedAt.orEmpty(),
                 dirty = true,
-                scope = cached?.scope
+                scope = cached?.scope,
+                modifiedAt = Instant.now().toString()
             )
         )
         sync(SyncResolution.NONE)
@@ -78,10 +77,18 @@ class CalendarRepository(
 
         val localWithScope = local.copy(scope = server.scope)
         val canWrite = server.scope == SCOPE_READ_WRITE
-        val baseMatches = local.updatedAt.isNotEmpty() && local.updatedAt == server.updatedAt
-        if (!canWrite || !(baseMatches || resolution == SyncResolution.KEEP_LOCAL)) {
+        val decided = resolution == SyncResolution.KEEP_LOCAL
+        val syncedBefore = local.updatedAt.isNotEmpty()
+        if (!canWrite || !(decided || syncedBefore)) {
             cacheStorage.save(localWithScope)
             return CalendarFetchOutcome.Conflict(localWithScope, server)
+        }
+
+        if (!decided && !localWins(local, server)) {
+            cacheStorage.save(
+                CachedCalendar(entries = server.entries, updatedAt = server.updatedAt, dirty = false, scope = server.scope)
+            )
+            return CalendarFetchOutcome.Fresh(server)
         }
 
         return runCatching { write(config, local.entries, server.updatedAt) }.fold(
@@ -95,13 +102,16 @@ class CalendarRepository(
             },
             onFailure = { error ->
                 cacheStorage.save(localWithScope)
-                if (error is HttpException && error.code() == HTTP_CONFLICT) {
-                    CalendarFetchOutcome.Conflict(localWithScope, server)
-                } else {
-                    CalendarFetchOutcome.Cached(localWithScope, error)
-                }
+                CalendarFetchOutcome.Cached(localWithScope, error)
             }
         )
+    }
+
+    private fun localWins(local: CachedCalendar, server: CalendarFetchResult): Boolean {
+        if (local.updatedAt == server.updatedAt) return true
+        val modifiedAt = local.modifiedAt?.let { runCatching { Instant.parse(it) }.getOrNull() } ?: return true
+        val serverUpdatedAt = runCatching { Instant.parse(server.updatedAt) }.getOrNull() ?: return true
+        return modifiedAt.isAfter(serverUpdatedAt)
     }
 
     private suspend fun download(config: ApiConfig): CalendarFetchResult {
@@ -134,6 +144,6 @@ class CalendarRepository(
     private companion object {
         const val SLOT_KEY = "calendar.json"
         const val SCOPE_READ_WRITE = "READ_WRITE"
-        const val HTTP_CONFLICT = 409
+        val lock = Mutex()
     }
 }

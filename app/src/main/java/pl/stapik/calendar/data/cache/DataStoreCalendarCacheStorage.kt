@@ -16,7 +16,8 @@ private data class CachedCalendarPayload(
     val entries: List<CalendarEntry>,
     val updatedAt: String,
     val dirty: Boolean = false,
-    val scope: String? = null
+    val scope: String? = null,
+    val modifiedAt: String? = null
 )
 
 class DataStoreCalendarCacheStorage(private val context: Context) : CalendarCacheStorage {
@@ -32,7 +33,8 @@ class DataStoreCalendarCacheStorage(private val context: Context) : CalendarCach
                     entries = it.entries,
                     updatedAt = it.updatedAt,
                     dirty = it.dirty,
-                    scope = it.scope
+                    scope = it.scope,
+                    modifiedAt = it.modifiedAt
                 )
             }
     }
@@ -43,7 +45,8 @@ class DataStoreCalendarCacheStorage(private val context: Context) : CalendarCach
                 entries = calendar.entries,
                 updatedAt = calendar.updatedAt,
                 dirty = calendar.dirty,
-                scope = calendar.scope
+                scope = calendar.scope,
+                modifiedAt = calendar.modifiedAt
             )
         )
         context.calendarCacheDataStore.edit { it[KEY_PAYLOAD] = payload }

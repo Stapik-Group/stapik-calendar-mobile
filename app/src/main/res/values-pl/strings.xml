@@ -57,4 +57,8 @@
     <string name="conflict_read_only_hint">Ten klucz jest tylko do odczytu, więc lokalnych zmian nie można wysłać. Możesz tylko pobrać wersję z serwera.</string>
     <string name="conflict_keep_local">Zachowaj lokalne i wyślij na serwer</string>
     <string name="conflict_use_server">Pobierz z serwera (odrzuć zmiany lokalne)</string>
+    <string name="connect_disconnect_button">Odłącz</string>
+    <string name="connect_disconnect_title">Odłączyć od serwera?</string>
+    <string name="connect_disconnect_message">Aplikacja przejdzie w tryb lokalny. Wpisy zostają na tym urządzeniu i nadal możesz je edytować. Po ponownym połączeniu wybierzesz, którą wersję zachować.</string>
+    <string name="connect_disconnected_info">Odłączono. Praca lokalna.</string>
 </resources>

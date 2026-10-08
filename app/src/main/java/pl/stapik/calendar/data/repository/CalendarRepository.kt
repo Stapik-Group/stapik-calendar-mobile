@@ -37,6 +37,11 @@ class CalendarRepository(
     suspend fun fetchEntries(resolution: SyncResolution = SyncResolution.NONE): CalendarFetchOutcome =
         lock.withLock { sync(resolution) }
 
+    suspend fun disconnect() = lock.withLock {
+        apiConfigStorage.clear()
+        cacheStorage.load()?.let { cacheStorage.save(it.copy(updatedAt = "", scope = null)) }
+    }
+
     suspend fun saveEntries(entries: List<CalendarEntry>): CalendarFetchOutcome = lock.withLock {
         val cached = cacheStorage.load()
         cacheStorage.save(

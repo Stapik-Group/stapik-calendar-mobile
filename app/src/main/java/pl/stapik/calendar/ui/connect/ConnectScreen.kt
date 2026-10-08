@@ -10,14 +10,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -25,7 +30,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import pl.stapik.calendar.R
+import pl.stapik.calendar.data.cache.DataStoreCalendarCacheStorage
 import pl.stapik.calendar.data.config.ApiConfigStorage
+import pl.stapik.calendar.data.repository.CalendarRepository
 import pl.stapik.calendar.ui.common.RetroScreenHeader
 import pl.stapik.calendar.ui.theme.LocalThemeColors
 import pl.stapik.calendar.ui.theme.themedSurface
@@ -35,10 +42,33 @@ fun ConnectScreen(
     storage: ApiConfigStorage,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: ConnectViewModel = viewModel(factory = remember { ConnectViewModelFactory(storage) })
+    viewModel: ConnectViewModel = viewModel(factory = rememberConnectViewModelFactory(storage))
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val themeColors = LocalThemeColors.current
+    var confirmDisconnect by remember { mutableStateOf(false) }
+
+    if (confirmDisconnect) {
+        AlertDialog(
+            onDismissRequest = { confirmDisconnect = false },
+            title = { Text(stringResource(R.string.connect_disconnect_title)) },
+            text = { Text(stringResource(R.string.connect_disconnect_message)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        confirmDisconnect = false
+                        viewModel.onDisconnect()
+                    }
+                ) {
+                    Text(stringResource(R.string.connect_disconnect_button))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmDisconnect = false }) { Text(stringResource(R.string.button_cancel)) }
+            }
+        )
+    }
+
     Column(modifier = modifier.fillMaxSize().background(themeColors.windowBackground)) {
         RetroScreenHeader(title = stringResource(R.string.menu_connect), onBack = onBack)
         Column(modifier = Modifier.padding(16.dp)) {
@@ -72,6 +102,21 @@ fun ConnectScreen(
                     Text(stringResource(R.string.connect_save), color = themeColors.textDark, fontWeight = FontWeight.Bold)
                 }
             }
+            if (state.isConnected) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Box(
+                    modifier = Modifier
+                        .themedSurface(themeColors = themeColors, backgroundColor = themeColors.cellBackground, raised = true)
+                        .clickable { confirmDisconnect = true }
+                        .padding(horizontal = 24.dp, vertical = 10.dp)
+                ) {
+                    Text(
+                        stringResource(R.string.connect_disconnect_button),
+                        color = themeColors.textDark,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
             when (val result = state.testResult) {
                 is ConnectTestResult.Success -> {
                     Spacer(modifier = Modifier.height(8.dp))
@@ -91,8 +136,20 @@ fun ConnectScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(result.message, color = Color(0xFFB00020))
                 }
+                ConnectTestResult.Disconnected -> {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(stringResource(R.string.connect_disconnected_info), color = themeColors.textDark)
+                }
                 null -> Unit
             }
         }
+    }
+}
+
+@Composable
+private fun rememberConnectViewModelFactory(storage: ApiConfigStorage): ConnectViewModelFactory {
+    val appContext = LocalContext.current.applicationContext
+    return remember(storage) {
+        ConnectViewModelFactory(storage, CalendarRepository(storage, DataStoreCalendarCacheStorage(appContext)))
     }
 }

@@ -56,4 +56,8 @@
     <string name="conflict_read_only_hint">This key is read-only, so local changes can\'t be sent. You can only download the server version.</string>
     <string name="conflict_keep_local">Keep local and send to server</string>
     <string name="conflict_use_server">Use server version (discard local changes)</string>
+    <string name="connect_disconnect_button">Disconnect</string>
+    <string name="connect_disconnect_title">Disconnect from the server?</string>
+    <string name="connect_disconnect_message">The app will switch to local mode. Entries stay on this device and you can keep editing them. After connecting again you will choose which version to keep.</string>
+    <string name="connect_disconnected_info">Disconnected. Working locally.</string>
 </resources>

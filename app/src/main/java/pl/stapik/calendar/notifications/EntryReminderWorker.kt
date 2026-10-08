@@ -15,6 +15,7 @@ import pl.stapik.calendar.R
 import pl.stapik.calendar.data.cache.DataStoreCalendarCacheStorage
 import pl.stapik.calendar.data.config.DataStoreApiConfigStorage
 import pl.stapik.calendar.data.notifications.DataStoreNotificationPreferencesStorage
+import pl.stapik.calendar.data.notifications.DataStoreNotifiedEntriesStorage
 import pl.stapik.calendar.data.repository.CalendarFetchOutcome
 import pl.stapik.calendar.data.repository.CalendarRepository
 import pl.stapik.calendar.ui.widget.CalendarWidget
@@ -45,15 +46,23 @@ class EntryReminderWorker(
 
         val today = LocalDate.now()
         val tomorrow = today.plusDays(1)
+        val notifiedStorage = DataStoreNotifiedEntriesStorage(applicationContext)
+        val alreadyNotified = notifiedStorage.load()
+        val notifiedNow = mutableSetOf<String>()
 
         entries.forEach { entry ->
             val entryDate = runCatching { LocalDate.parse(entry.date) }.getOrNull() ?: return@forEach
-            when (entryDate) {
-                today -> notify(entry.name, isToday = true)
-                tomorrow -> notify(entry.name, isToday = false)
-                else -> Unit
+            val isToday = entryDate == today
+            if (!isToday && entryDate != tomorrow) return@forEach
+
+            val key = "${if (isToday) "today" else "tomorrow"}|${entry.date}|${entry.name}"
+            if (key !in alreadyNotified) {
+                notify(entry.name, isToday = isToday)
             }
+            notifiedNow += key
         }
+
+        notifiedStorage.save(notifiedNow)
 
         return Result.success()
     }

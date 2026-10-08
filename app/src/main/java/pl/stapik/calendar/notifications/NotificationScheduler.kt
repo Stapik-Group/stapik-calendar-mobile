@@ -13,13 +13,16 @@ import java.time.ZoneId
 object NotificationScheduler {
     private const val LEGACY_WORK_NAME = "entry_reminder_check"
     private const val ALARM_REQUEST_CODE = 1
-    private val TARGET_TIME: LocalTime = LocalTime.of(8, 0)
+    private val TARGET_TIMES: List<LocalTime> = listOf(8, 11, 14, 17, 20).map { LocalTime.of(it, 0) }
 
     fun ensureScheduled(context: Context, from: LocalDateTime = LocalDateTime.now()) {
         WorkManager.getInstance(context).cancelUniqueWork(LEGACY_WORK_NAME)
 
-        val nextTarget = from.toLocalDate().atTime(TARGET_TIME)
-            .let { if (it.isAfter(from)) it else it.plusDays(1) }
+        val today = from.toLocalDate()
+        val nextTarget = TARGET_TIMES
+            .map { today.atTime(it) }
+            .firstOrNull { it.isAfter(from) }
+            ?: today.plusDays(1).atTime(TARGET_TIMES.first())
         val triggerAtMillis = nextTarget.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
 
         val alarmManager = context.getSystemService(AlarmManager::class.java)

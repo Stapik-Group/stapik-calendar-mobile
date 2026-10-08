@@ -20,7 +20,6 @@
     <string name="error_unknown">Etwas ist schiefgelaufen: %1$s</string>
     <string name="retry">Erneut versuchen</string>
     <string name="connect_test_success">Verbunden als %1$s</string>
-    <string name="connect_scope_warning">Dieser Schlüssel hat Schreibzugriff — verwende für dieses Gerät idealerweise einen dedizierten Nur-Lese-Schlüssel</string>
     <string name="error_not_found">Kalender wurde auf dem Server nicht gefunden. Überprüfe die Verbindungseinstellungen.</string>
     <string name="cached_data_banner">Zeige zwischengespeicherte Daten vom %1$s</string>
     <string name="menu_theme">Design</string>
@@ -39,4 +38,28 @@
     <string name="calendar_widget_name">Stapik Calendar</string>
     <string name="calendar_widget_description">Heutige und morgige Kalendereinträge</string>
 
+    <string name="connect_scope_read_only">Nur-Lese-Schlüssel: Einträge können nicht bearbeitet werden.</string>
+    <string name="connect_scope_read_write">Lese-Schreib-Schlüssel: Du kannst Einträge hinzufügen und bearbeiten.</string>
+    <string name="local_mode_banner">Lokaler Modus, Änderungen werden auf diesem Gerät gespeichert. Tippe, um dich mit dem Server zu verbinden.</string>
+    <string name="pending_changes_banner">Offline: Lokale Änderungen werden an den Server gesendet, sobald er erreichbar ist.</string>
+    <string name="entry_dialog_add_title">Neuer Eintrag</string>
+    <string name="entry_dialog_edit_title">Eintrag bearbeiten</string>
+    <string name="entry_name_label">Name</string>
+    <string name="entry_link_label">Link (optional)</string>
+    <string name="entry_open_link">Link öffnen</string>
+    <string name="entry_date_label">Datum</string>
+    <string name="entry_color_label">Farbe</string>
+    <string name="button_save">Speichern</string>
+    <string name="button_cancel">Abbrechen</string>
+    <string name="button_delete">Löschen</string>
+    <string name="button_ok">OK</string>
+    <string name="conflict_title">Lokale Änderungen gefunden</string>
+    <string name="conflict_message">Dieses Gerät hat Änderungen, die nicht auf dem Server sind.\n\nLokal: %1$d Einträge\nServer: %2$d Einträge (letzte Änderung: %3$s)\n\nWelche Version möchtest du behalten?</string>
+    <string name="conflict_read_only_hint">Dieser Schlüssel ist schreibgeschützt, daher können lokale Änderungen nicht gesendet werden. Du kannst nur die Serverversion laden.</string>
+    <string name="conflict_keep_local">Lokale behalten und an Server senden</string>
+    <string name="conflict_use_server">Serverversion verwenden (lokale Änderungen verwerfen)</string>
+    <string name="connect_disconnect_button">Trennen</string>
+    <string name="connect_disconnect_title">Vom Server trennen?</string>
+    <string name="connect_disconnect_message">Die App wechselt in den lokalen Modus. Die Einträge bleiben auf diesem Gerät und du kannst sie weiter bearbeiten. Nach dem erneuten Verbinden wählst du, welche Version behalten wird.</string>
+    <string name="connect_disconnected_info">Getrennt. Lokaler Modus.</string>
 </resources>

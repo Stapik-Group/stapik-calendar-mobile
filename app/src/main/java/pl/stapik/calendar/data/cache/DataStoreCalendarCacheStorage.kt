@@ -12,7 +12,13 @@ import pl.stapik.calendar.data.model.CalendarEntry
 private val Context.calendarCacheDataStore by preferencesDataStore(name = "calendar_cache")
 
 @Serializable
-private data class CachedCalendarPayload(val entries: List<CalendarEntry>, val updatedAt: String)
+private data class CachedCalendarPayload(
+    val entries: List<CalendarEntry>,
+    val updatedAt: String,
+    val dirty: Boolean = false,
+    val scope: String? = null,
+    val modifiedAt: String? = null
+)
 
 class DataStoreCalendarCacheStorage(private val context: Context) : CalendarCacheStorage {
     private val json = Json { ignoreUnknownKeys = true }
@@ -22,11 +28,27 @@ class DataStoreCalendarCacheStorage(private val context: Context) : CalendarCach
         // A corrupted or pre-migration payload should not crash the app, just act as no cache.
         return runCatching { json.decodeFromString<CachedCalendarPayload>(raw) }
             .getOrNull()
-            ?.let { CachedCalendar(entries = it.entries, updatedAt = it.updatedAt) }
+            ?.let {
+                CachedCalendar(
+                    entries = it.entries,
+                    updatedAt = it.updatedAt,
+                    dirty = it.dirty,
+                    scope = it.scope,
+                    modifiedAt = it.modifiedAt
+                )
+            }
     }
 
-    override suspend fun save(entries: List<CalendarEntry>, updatedAt: String) {
-        val payload = json.encodeToString(CachedCalendarPayload(entries = entries, updatedAt = updatedAt))
+    override suspend fun save(calendar: CachedCalendar) {
+        val payload = json.encodeToString(
+            CachedCalendarPayload(
+                entries = calendar.entries,
+                updatedAt = calendar.updatedAt,
+                dirty = calendar.dirty,
+                scope = calendar.scope,
+                modifiedAt = calendar.modifiedAt
+            )
+        )
         context.calendarCacheDataStore.edit { it[KEY_PAYLOAD] = payload }
     }
 

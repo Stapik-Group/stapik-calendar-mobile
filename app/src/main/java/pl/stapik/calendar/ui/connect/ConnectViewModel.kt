@@ -13,16 +13,20 @@ import java.net.UnknownHostException
 import pl.stapik.calendar.data.config.ApiConfig
 import pl.stapik.calendar.data.config.ApiConfigStorage
 import pl.stapik.calendar.data.network.NetworkModule
+import pl.stapik.calendar.data.repository.CalendarRepository
 import retrofit2.HttpException
 
-class ConnectViewModel(private val storage: ApiConfigStorage) : ViewModel() {
+class ConnectViewModel(
+    private val storage: ApiConfigStorage,
+    private val repository: CalendarRepository
+) : ViewModel() {
     private val _uiState = MutableStateFlow(ConnectUiState())
     val uiState: StateFlow<ConnectUiState> = _uiState.asStateFlow()
 
     init {
         viewModelScope.launch {
             storage.load()?.let { config ->
-                _uiState.update { it.copy(baseUrl = config.baseUrl, apiKey = config.apiKey) }
+                _uiState.update { it.copy(baseUrl = config.baseUrl, apiKey = config.apiKey, isConnected = true) }
             }
         }
     }
@@ -42,6 +46,7 @@ class ConnectViewModel(private val storage: ApiConfigStorage) : ViewModel() {
                 _uiState.update {
                     it.copy(
                         isTesting = false,
+                        isConnected = true,
                         testResult = ConnectTestResult.Success(keyLabel = me.keyLabel, scope = me.scope)
                     )
                 }
@@ -50,6 +55,13 @@ class ConnectViewModel(private val storage: ApiConfigStorage) : ViewModel() {
                     it.copy(isTesting = false, testResult = ConnectTestResult.Error(mapConnectError(error)))
                 }
             }
+        }
+    }
+
+    fun onDisconnect() {
+        viewModelScope.launch {
+            repository.disconnect()
+            _uiState.value = ConnectUiState(testResult = ConnectTestResult.Disconnected)
         }
     }
 
@@ -63,7 +75,10 @@ class ConnectViewModel(private val storage: ApiConfigStorage) : ViewModel() {
     }
 }
 
-class ConnectViewModelFactory(private val storage: ApiConfigStorage) : ViewModelProvider.Factory {
+class ConnectViewModelFactory(
+    private val storage: ApiConfigStorage,
+    private val repository: CalendarRepository
+) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T = ConnectViewModel(storage) as T
+    override fun <T : ViewModel> create(modelClass: Class<T>): T = ConnectViewModel(storage, repository) as T
 }

@@ -20,7 +20,6 @@
     <string name="error_unknown">Coś poszło nie tak: %1$s</string>
     <string name="retry">Spróbuj ponownie</string>
     <string name="connect_test_success">Połączono jako %1$s</string>
-    <string name="connect_scope_warning">Ten klucz ma uprawnienia do zapisu — rozważ użycie dedykowanego klucza tylko-do-odczytu dla tego urządzenia</string>
     <string name="error_not_found">Nie znaleziono kalendarza na serwerze. Sprawdź ustawienia połączenia.</string>
     <string name="cached_data_banner">Wyświetlam dane z cache z %1$s</string>
     <string name="menu_theme">Motyw</string>
@@ -38,4 +37,28 @@
     <string name="widget_tomorrow">Jutro</string>
     <string name="calendar_widget_name">Stapik Calendar</string>
     <string name="calendar_widget_description">Dzisiejsze i jutrzejsze wpisy z kalendarza.</string>
+    <string name="connect_scope_read_only">Klucz tylko do odczytu: wpisów nie można edytować.</string>
+    <string name="connect_scope_read_write">Klucz do odczytu i zapisu: możesz dodawać i edytować wpisy.</string>
+    <string name="local_mode_banner">Praca lokalna, zmiany zapisują się na tym urządzeniu. Dotknij, aby połączyć z serwerem.</string>
+    <string name="pending_changes_banner">Offline: lokalne zmiany zostaną wysłane na serwer, gdy będzie dostępny.</string>
+    <string name="entry_dialog_add_title">Nowy wpis</string>
+    <string name="entry_dialog_edit_title">Edytuj wpis</string>
+    <string name="entry_name_label">Nazwa</string>
+    <string name="entry_link_label">Link (opcjonalnie)</string>
+    <string name="entry_open_link">Otwórz link</string>
+    <string name="entry_date_label">Data</string>
+    <string name="entry_color_label">Kolor</string>
+    <string name="button_save">Zapisz</string>
+    <string name="button_cancel">Anuluj</string>
+    <string name="button_delete">Usuń</string>
+    <string name="button_ok">OK</string>
+    <string name="conflict_title">Znaleziono zmiany lokalne</string>
+    <string name="conflict_message">To urządzenie ma zmiany, których nie ma na serwerze.\n\nLokalnie: %1$d wpisów\nSerwer: %2$d wpisów (ostatnia zmiana: %3$s)\n\nKtórą wersję zachować?</string>
+    <string name="conflict_read_only_hint">Ten klucz jest tylko do odczytu, więc lokalnych zmian nie można wysłać. Możesz tylko pobrać wersję z serwera.</string>
+    <string name="conflict_keep_local">Zachowaj lokalne i wyślij na serwer</string>
+    <string name="conflict_use_server">Pobierz z serwera (odrzuć zmiany lokalne)</string>
+    <string name="connect_disconnect_button">Odłącz</string>
+    <string name="connect_disconnect_title">Odłączyć od serwera?</string>
+    <string name="connect_disconnect_message">Aplikacja przejdzie w tryb lokalny. Wpisy zostają na tym urządzeniu i nadal możesz je edytować. Po ponownym połączeniu wybierzesz, którą wersję zachować.</string>
+    <string name="connect_disconnected_info">Odłączono. Praca lokalna.</string>
 </resources>

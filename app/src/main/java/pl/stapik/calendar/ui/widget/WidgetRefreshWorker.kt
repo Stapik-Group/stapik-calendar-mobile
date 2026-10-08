@@ -1,6 +1,7 @@
 package pl.stapik.calendar.ui.widget
 
 import android.content.Context
+import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.updateAll
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
@@ -21,6 +22,13 @@ class WidgetRefreshWorker(
             ).fetchEntries()
         }
         CalendarWidget().updateAll(applicationContext)
+
+        if (inputData.getBoolean(WidgetRefreshScheduler.KEY_CHAIN, false)) {
+            val hasWidgets = GlanceAppWidgetManager(applicationContext)
+                .getGlanceIds(CalendarWidget::class.java)
+                .isNotEmpty()
+            if (hasWidgets) WidgetRefreshScheduler.scheduleNext(applicationContext)
+        }
         return Result.success()
     }
 }

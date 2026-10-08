@@ -33,6 +33,8 @@ import pl.stapik.calendar.data.cache.DataStoreCalendarCacheStorage
 import pl.stapik.calendar.data.model.CalendarEntry
 import pl.stapik.calendar.data.theme.DataStoreThemeStorage
 import pl.stapik.calendar.ui.theme.AppTheme
+import pl.stapik.calendar.ui.theme.EntryColorDef
+import pl.stapik.calendar.ui.theme.EntryPalettes
 import pl.stapik.calendar.ui.theme.ThemeColors
 import pl.stapik.calendar.ui.theme.ThemePalettes
 import java.time.LocalDate
@@ -51,7 +53,8 @@ class CalendarWidget : GlanceAppWidget() {
         val tomorrow = today.plusDays(1)
 
         val entriesByDate = cache?.entries.orEmpty()
-            .groupBy { LocalDate.parse(it.date) }
+            .mapNotNull { entry -> runCatching { LocalDate.parse(entry.date) }.getOrNull()?.let { it to entry } }
+            .groupBy({ it.first }, { it.second })
 
         val todayLabel = context.getString(R.string.widget_today)
         val tomorrowLabel = context.getString(R.string.widget_tomorrow)
@@ -82,6 +85,7 @@ private fun CalendarWidgetContent(
 ) {
     val selectedTheme by theme.collectAsState(initial = AppTheme.CLASSIC)
     val themeColors = ThemePalettes.forTheme(selectedTheme)
+    val entryPalette = EntryPalettes.forTheme(selectedTheme)
     val appAction = actionStartActivity<MainActivity>()
 
     LazyColumn(
@@ -109,7 +113,7 @@ private fun CalendarWidgetContent(
             items = todayEntries,
             itemId = { entry -> entryId(entry) }
         ) { entry ->
-            CalendarEntryRow(entry, themeColors, appAction)
+            CalendarEntryRow(entry, themeColors, entryPalette, appAction)
         }
 
         if (todayEntries.isNotEmpty()) {
@@ -131,7 +135,7 @@ private fun CalendarWidgetContent(
             items = tomorrowEntries,
             itemId = { entry -> entryId(entry) }
         ) { entry ->
-            CalendarEntryRow(entry, themeColors, appAction)
+            CalendarEntryRow(entry, themeColors, entryPalette, appAction)
         }
     }
 }
@@ -187,11 +191,14 @@ private fun DateHeader(
 private fun CalendarEntryRow(
     entry: CalendarEntry,
     themeColors: ThemeColors,
+    entryPalette: Map<String, EntryColorDef>,
     action: androidx.glance.action.Action
 ) {
+    val entryColor = entryPalette[entry.color] ?: entryPalette.getValue("default")
     val modifier = GlanceModifier
         .fillMaxWidth()
         .clickable(action)
+        .background(ColorProvider(day = entryColor.background, night = entryColor.background))
         .padding(horizontal = 10.dp, vertical = 7.dp)
 
     Column(
@@ -205,8 +212,8 @@ private fun CalendarEntryRow(
                 text = entry.name,
                 style = TextStyle(
                     color = ColorProvider(
-                        day = themeColors.textDark,
-                        night = themeColors.textDark
+                        day = entryColor.textColor,
+                        night = entryColor.textColor
                     ),
                     fontSize = 13.sp
                 )

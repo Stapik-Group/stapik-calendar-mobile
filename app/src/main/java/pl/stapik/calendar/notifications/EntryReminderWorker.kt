@@ -36,6 +36,8 @@ class EntryReminderWorker(
         val entries = when (val outcome = repository.fetchEntries()) {
             is CalendarFetchOutcome.Fresh -> outcome.result.entries
             is CalendarFetchOutcome.Cached -> outcome.cached.entries
+            is CalendarFetchOutcome.LocalOnly -> outcome.cached.entries
+            is CalendarFetchOutcome.Conflict -> outcome.local.entries
             is CalendarFetchOutcome.Failure -> return Result.retry()
         }
 

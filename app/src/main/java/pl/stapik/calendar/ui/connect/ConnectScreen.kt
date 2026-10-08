@@ -79,13 +79,13 @@ fun ConnectScreen(
                         stringResource(R.string.connect_test_success, result.keyLabel ?: result.scope),
                         color = themeColors.textDark
                     )
-                    if (result.scope != "READ_ONLY") {
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            stringResource(R.string.connect_scope_warning),
-                            color = Color(0xFFB00020)
-                        )
-                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        stringResource(
+                            if (result.scope == "READ_WRITE") R.string.connect_scope_read_write else R.string.connect_scope_read_only
+                        ),
+                        color = themeColors.textDark
+                    )
                 }
                 is ConnectTestResult.Error -> {
                     Spacer(modifier = Modifier.height(8.dp))

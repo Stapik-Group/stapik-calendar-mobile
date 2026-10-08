@@ -14,13 +14,23 @@ fun WeekPage(
     weekStart: LocalDate,
     entriesByDay: Map<LocalDate, List<CalendarEntry>>,
     today: LocalDate,
+    canEdit: Boolean,
+    onAddEntry: (LocalDate) -> Unit,
+    onEditEntry: (CalendarEntry) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val days = remember(weekStart) { (0..6).map { weekStart.plusDays(it.toLong()) } }
 
     LazyColumn(modifier = modifier.fillMaxSize()) {
         items(days) { date ->
-            DayRow(date = date, entries = entriesByDay[date].orEmpty(), isToday = date == today)
+            DayRow(
+                date = date,
+                entries = entriesByDay[date].orEmpty(),
+                isToday = date == today,
+                canEdit = canEdit,
+                onAddEntry = onAddEntry,
+                onEditEntry = onEditEntry
+            )
         }
     }
 }

@@ -9,8 +9,10 @@ sealed interface CalendarUiState {
         val entriesByDay: Map<LocalDate, List<CalendarEntry>>,
         val isRefreshing: Boolean = false,
         val isStale: Boolean = false,
-        val updatedAt: String? = null
+        val updatedAt: String? = null,
+        val canEdit: Boolean = false,
+        val isLocalMode: Boolean = false,
+        val hasPendingChanges: Boolean = false
     ) : CalendarUiState
     data class Error(val error: CalendarLoadError) : CalendarUiState
-    data object NotConfigured : CalendarUiState
 }

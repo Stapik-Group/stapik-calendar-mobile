@@ -19,7 +19,6 @@
     <string name="error_unknown">Something went wrong: %1$s</string>
     <string name="retry">Retry</string>
     <string name="connect_test_success">Connected as %1$s</string>
-    <string name="connect_scope_warning">This key has read-write access — consider using a dedicated read-only key for this device</string>
     <string name="error_not_found">Calendar not found on the server. Check your connection settings.</string>
     <string name="cached_data_banner">Showing cached data from %1$s</string>
     <string name="menu_theme">Theme</string>
@@ -37,4 +36,24 @@
     <string name="widget_tomorrow">Tomorrow</string>
     <string name="calendar_widget_name">Stapik Calendar</string>
     <string name="calendar_widget_description">Today\'s and tomorrow\'s calendar entries</string>
+    <string name="connect_scope_read_only">Read-only key: entries can\'t be edited.</string>
+    <string name="connect_scope_read_write">Read-write key: you can add and edit entries.</string>
+    <string name="local_mode_banner">Working locally, changes are saved on this device. Tap to connect to the server.</string>
+    <string name="pending_changes_banner">Offline: local changes will be sent to the server when it is reachable.</string>
+    <string name="entry_dialog_add_title">New entry</string>
+    <string name="entry_dialog_edit_title">Edit entry</string>
+    <string name="entry_name_label">Name</string>
+    <string name="entry_link_label">Link (optional)</string>
+    <string name="entry_open_link">Open link</string>
+    <string name="entry_date_label">Date</string>
+    <string name="entry_color_label">Color</string>
+    <string name="button_save">Save</string>
+    <string name="button_cancel">Cancel</string>
+    <string name="button_delete">Delete</string>
+    <string name="button_ok">OK</string>
+    <string name="conflict_title">Local changes found</string>
+    <string name="conflict_message">This device has changes that are not on the server.\n\nLocal: %1$d entries\nServer: %2$d entries (last change: %3$s)\n\nWhich version do you want to keep?</string>
+    <string name="conflict_read_only_hint">This key is read-only, so local changes can\'t be sent. You can only download the server version.</string>
+    <string name="conflict_keep_local">Keep local and send to server</string>
+    <string name="conflict_use_server">Use server version (discard local changes)</string>
 </resources>

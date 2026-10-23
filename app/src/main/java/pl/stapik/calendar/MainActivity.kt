@@ -5,10 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.ui.Modifier
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -16,25 +12,25 @@ import androidx.compose.runtime.remember
 import pl.stapik.calendar.data.notifications.DataStoreNotificationPreferencesStorage
 import pl.stapik.calendar.data.theme.DataStoreThemeStorage
 import pl.stapik.calendar.ui.root.AppRoot
-import pl.stapik.calendar.ui.theme.AppTheme
 import pl.stapik.calendar.ui.theme.ThemePalettes
-import pl.stapik.calendar.ui.theme.toMaterialColorScheme
+import pl.stapik.calendar.ui.theme.toAppTheme
 import pl.stapik.calendar.ui.widget.WidgetRefreshScheduler
+import pl.stapik.common.theme.ThemeId
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val apiConfigStorage = appContainer.configStorage
+            val container = appContainer
             val themeStorage = remember { DataStoreThemeStorage(applicationContext) }
             val notificationPreferencesStorage = remember { DataStoreNotificationPreferencesStorage(applicationContext) }
 
-            val theme by themeStorage.theme.collectAsState(initial = AppTheme.CLASSIC)
-            val themeColors = ThemePalettes.forTheme(theme)
+            val theme by themeStorage.theme.collectAsState(initial = ThemeId.CLASSIC)
+            val isDark = ThemePalettes.forTheme(theme.toAppTheme()).isDark
 
-            DisposableEffect(themeColors.isDark) {
-                val barStyle = if (themeColors.isDark) {
+            DisposableEffect(isDark) {
+                val barStyle = if (isDark) {
                     SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
                 } else {
                     SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT)
@@ -43,11 +39,13 @@ class MainActivity : ComponentActivity() {
                 onDispose { }
             }
 
-            MaterialTheme(colorScheme = themeColors.toMaterialColorScheme()) {
-                Surface(modifier = Modifier.fillMaxSize(), color = themeColors.windowBackground) {
-                    AppRoot(apiConfigStorage = apiConfigStorage, themeStorage = themeStorage, notificationPreferencesStorage = notificationPreferencesStorage)
-                }
-            }
+            AppRoot(
+                apiConfigStorage = container.configStorage,
+                themeStorage = themeStorage,
+                notificationPreferencesStorage = notificationPreferencesStorage,
+                repository = container.calendarRepository,
+                newConnectController = container::newConnectController
+            )
         }
     }
 

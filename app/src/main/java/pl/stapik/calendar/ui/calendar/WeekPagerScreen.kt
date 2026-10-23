@@ -10,7 +10,6 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -20,29 +19,19 @@ import com.stapikgroup.stapikcalendar.ui.calendar.WeekNavBar
 import java.time.LocalDate
 import kotlinx.coroutines.launch
 import pl.stapik.calendar.data.model.CalendarEntry
-import pl.stapik.calendar.data.config.ApiConfigStorage
 import pl.stapik.calendar.data.repository.CalendarRepository
 import pl.stapik.calendar.ui.theme.LocalThemeColors
 import pl.stapik.calendar.ui.theme.themedSurface
 import pl.stapik.calendar.R
-import pl.stapik.calendar.data.cache.DataStoreCalendarCacheStorage
 
 @Composable
 fun WeekPagerScreen(
-    apiConfigStorage: ApiConfigStorage,
+    repository: CalendarRepository,
     onNavigateToConnect: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
     val viewModel: CalendarViewModel = viewModel(
-        factory = remember {
-            CalendarViewModelFactory(
-                CalendarRepository(
-                    apiConfigStorage = apiConfigStorage,
-                    cacheStorage = DataStoreCalendarCacheStorage(context.applicationContext)
-                )
-            )
-        }
+        factory = remember(repository) { CalendarViewModelFactory(repository) }
     )
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val pagerState = rememberPagerState(initialPage = WeekPaging.INITIAL_PAGE) { WeekPaging.PAGE_COUNT }

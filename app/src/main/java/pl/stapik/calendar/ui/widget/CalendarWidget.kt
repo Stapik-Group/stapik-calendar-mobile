@@ -32,11 +32,12 @@ import pl.stapik.calendar.R
 import pl.stapik.calendar.data.cache.DataStoreCalendarCacheStorage
 import pl.stapik.calendar.data.model.CalendarEntry
 import pl.stapik.calendar.data.theme.DataStoreThemeStorage
-import pl.stapik.calendar.ui.theme.AppTheme
 import pl.stapik.calendar.ui.theme.EntryColorDef
 import pl.stapik.calendar.ui.theme.EntryPalettes
 import pl.stapik.calendar.ui.theme.ThemeColors
 import pl.stapik.calendar.ui.theme.ThemePalettes
+import pl.stapik.calendar.ui.theme.toAppTheme
+import pl.stapik.common.theme.ThemeId
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -81,11 +82,12 @@ private fun CalendarWidgetContent(
     tomorrowLabel: String,
     todayEntries: List<CalendarEntry>,
     tomorrowEntries: List<CalendarEntry>,
-    theme: kotlinx.coroutines.flow.Flow<AppTheme>
+    theme: kotlinx.coroutines.flow.Flow<ThemeId>
 ) {
-    val selectedTheme by theme.collectAsState(initial = AppTheme.CLASSIC)
-    val themeColors = ThemePalettes.forTheme(selectedTheme)
-    val entryPalette = EntryPalettes.forTheme(selectedTheme)
+    val selectedTheme by theme.collectAsState(initial = ThemeId.CLASSIC)
+    val appTheme = selectedTheme.toAppTheme()
+    val themeColors = ThemePalettes.forTheme(appTheme)
+    val entryPalette = EntryPalettes.forTheme(appTheme)
     val appAction = actionStartActivity<MainActivity>()
 
     LazyColumn(

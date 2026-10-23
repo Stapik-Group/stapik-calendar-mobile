@@ -14,8 +14,8 @@ android {
         applicationId = "pl.stapik.calendar"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.2.0"
+        versionCode = 2
+        versionName = "1.3.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -73,14 +73,20 @@ dependencies {
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.datastore.preferences)
-    implementation(libs.retrofit)
-    implementation(libs.okhttp)
-    implementation(libs.okhttp.logging)
     implementation(libs.kotlinx.serialization.json)
-    implementation(libs.retrofit.kotlinx.serialization.converter)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.glance)
     implementation(libs.androidx.glance.appwidget)
+    implementation(libs.core.cloud)
+    implementation(libs.core.crypto)
+    implementation(libs.core.i18n)
+    implementation(libs.core.model)
+    implementation(libs.core.presentation)
+    implementation(libs.core.settings)
+    implementation(libs.core.sync)
+    implementation(libs.core.theme)
+    implementation(libs.ui.shell)
+    implementation(libs.ui.theme)
 
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))

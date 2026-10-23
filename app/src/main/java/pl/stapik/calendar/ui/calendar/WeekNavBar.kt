@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -17,8 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import pl.stapik.calendar.ui.theme.LocalThemeColors
-import pl.stapik.calendar.ui.theme.themedSurface
+import pl.stapik.common.ui.components.themedSurface
+import pl.stapik.common.ui.theme.StapikTheme
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -34,13 +35,14 @@ fun WeekNavBar(
 
     val weekEnd = weekStart.plusDays(6)
     val label = "${weekLabelFormatter.format(weekStart)} – ${weekLabelFormatter.format(weekEnd)} ${weekEnd.year}"
-    val themeColors = LocalThemeColors.current
+    val scheme = MaterialTheme.colorScheme
+    val colors = StapikTheme.colors
 
     Row(
         modifier = modifier
             .fillMaxWidth()
             .statusBarsPadding()
-            .background(themeColors.windowBackground)
+            .background(scheme.background)
             .padding(horizontal = 8.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
@@ -51,11 +53,11 @@ fun WeekNavBar(
             modifier = Modifier
                 .weight(1f)
                 .padding(horizontal = 8.dp)
-                .themedSurface(themeColors = themeColors, backgroundColor = themeColors.accent, raised = false)
+                .themedSurface(colors, scheme.primary, raised = false)
                 .padding(horizontal = 12.dp, vertical = 8.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text(text = label, color = themeColors.textOnAccent, fontWeight = FontWeight.Bold)
+            Text(text = label, color = scheme.onPrimary, fontWeight = FontWeight.Bold)
         }
 
         NavButton(label = "▶", onClick = onNextWeek)
@@ -64,14 +66,15 @@ fun WeekNavBar(
 
 @Composable
 private fun NavButton(label: String, onClick: () -> Unit) {
-    val themeColors = LocalThemeColors.current
+    val scheme = MaterialTheme.colorScheme
+    val colors = StapikTheme.colors
     Box(
         modifier = Modifier
             .size(36.dp)
-            .themedSurface(themeColors = themeColors, backgroundColor = themeColors.cellBackground, raised = true)
+            .themedSurface(colors, colors.button, raised = true)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
-        Text(text = label, color = themeColors.textDark)
+        Text(text = label, color = scheme.onBackground)
     }
 }

@@ -4,29 +4,12 @@
     <string name="loading">Laden</string>
     <string name="no_entries">—</string>
     <string name="settings">Einstellungen</string>
-    <string name="menu_connect">Verbinden</string>
-    <string name="menu_about">Über das Programm</string>
-    <string name="connect_url_label">Server-URL</string>
-    <string name="connect_key_label">API-Schlüssel</string>
-    <string name="connect_save">Speichern</string>
-    <string name="connect_saved_confirmation">Gespeichert</string>
-    <string name="about_version_label">Version</string>
-    <string name="about_author_label">Autor</string>
-    <string name="about_github_label">Auf GitHub ansehen</string>
-    <string name="not_configured_message">Keine Verbindung konfiguriert.</string>
-    <string name="not_configured_button">Zu Verbinden gehen</string>
     <string name="error_no_network">Keine Netzwerkverbindung.</string>
     <string name="error_unauthorized">Ungültige Server-URL oder API-Schlüssel.</string>
     <string name="error_unknown">Etwas ist schiefgelaufen: %1$s</string>
     <string name="retry">Erneut versuchen</string>
-    <string name="connect_test_success">Verbunden als %1$s</string>
     <string name="error_not_found">Kalender wurde auf dem Server nicht gefunden. Überprüfe die Verbindungseinstellungen.</string>
     <string name="cached_data_banner">Zeige zwischengespeicherte Daten vom %1$s</string>
-    <string name="menu_theme">Design</string>
-    <string name="theme_classic">Klassisch</string>
-    <string name="theme_classic_pink">Klassisch Pink</string>
-    <string name="theme_modern">Modern</string>
-    <string name="theme_dark">Dunkel</string>
     <string name="menu_notifications">Benachrichtigungen</string>
     <string name="notifications_toggle_label">Erinnere mich an bevorstehende Einträge</string>
     <string name="notification_channel_name">Eintrags-Erinnerungen</string>
@@ -38,8 +21,6 @@
     <string name="calendar_widget_name">Stapik Calendar</string>
     <string name="calendar_widget_description">Heutige und morgige Kalendereinträge</string>
 
-    <string name="connect_scope_read_only">Nur-Lese-Schlüssel: Einträge können nicht bearbeitet werden.</string>
-    <string name="connect_scope_read_write">Lese-Schreib-Schlüssel: Du kannst Einträge hinzufügen und bearbeiten.</string>
     <string name="local_mode_banner">Lokaler Modus, Änderungen werden auf diesem Gerät gespeichert. Tippe, um dich mit dem Server zu verbinden.</string>
     <string name="pending_changes_banner">Offline: Lokale Änderungen werden an den Server gesendet, sobald er erreichbar ist.</string>
     <string name="entry_dialog_add_title">Neuer Eintrag</string>
@@ -58,8 +39,4 @@
     <string name="conflict_read_only_hint">Dieser Schlüssel ist schreibgeschützt, daher können lokale Änderungen nicht gesendet werden. Du kannst nur die Serverversion laden.</string>
     <string name="conflict_keep_local">Lokale behalten und an Server senden</string>
     <string name="conflict_use_server">Serverversion verwenden (lokale Änderungen verwerfen)</string>
-    <string name="connect_disconnect_button">Trennen</string>
-    <string name="connect_disconnect_title">Vom Server trennen?</string>
-    <string name="connect_disconnect_message">Die App wechselt in den lokalen Modus. Die Einträge bleiben auf diesem Gerät und du kannst sie weiter bearbeiten. Nach dem erneuten Verbinden wählst du, welche Version behalten wird.</string>
-    <string name="connect_disconnected_info">Getrennt. Lokaler Modus.</string>
 </resources>

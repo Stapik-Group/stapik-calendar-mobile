@@ -1,9 +1,11 @@
 package pl.stapik.calendar.ui.widget
 
 import android.content.Context
+import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
@@ -32,11 +34,12 @@ import pl.stapik.calendar.R
 import pl.stapik.calendar.data.cache.DataStoreCalendarCacheStorage
 import pl.stapik.calendar.data.model.CalendarEntry
 import pl.stapik.calendar.data.theme.DataStoreThemeStorage
-import pl.stapik.calendar.ui.theme.AppTheme
-import pl.stapik.calendar.ui.theme.EntryColorDef
-import pl.stapik.calendar.ui.theme.EntryPalettes
-import pl.stapik.calendar.ui.theme.ThemeColors
-import pl.stapik.calendar.ui.theme.ThemePalettes
+import pl.stapik.calendar.ui.theme.entryColorFor
+import pl.stapik.common.theme.ThemeId
+import pl.stapik.common.theme.ThemePalettes
+import pl.stapik.common.ui.theme.StapikColors
+import pl.stapik.common.ui.theme.toMaterialColorScheme
+import pl.stapik.common.ui.theme.toStapikColors
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -81,11 +84,12 @@ private fun CalendarWidgetContent(
     tomorrowLabel: String,
     todayEntries: List<CalendarEntry>,
     tomorrowEntries: List<CalendarEntry>,
-    theme: kotlinx.coroutines.flow.Flow<AppTheme>
+    theme: kotlinx.coroutines.flow.Flow<ThemeId>
 ) {
-    val selectedTheme by theme.collectAsState(initial = AppTheme.CLASSIC)
-    val themeColors = ThemePalettes.forTheme(selectedTheme)
-    val entryPalette = EntryPalettes.forTheme(selectedTheme)
+    val selectedTheme by theme.collectAsState(initial = ThemeId.CLASSIC)
+    val palette = remember(selectedTheme) { ThemePalettes.of(selectedTheme) }
+    val scheme = remember(palette) { palette.toMaterialColorScheme() }
+    val colors = remember(palette) { palette.toStapikColors() }
     val appAction = actionStartActivity<MainActivity>()
 
     LazyColumn(
@@ -93,8 +97,8 @@ private fun CalendarWidgetContent(
             .fillMaxSize()
             .background(
                 ColorProvider(
-                    day = themeColors.windowBackground,
-                    night = themeColors.windowBackground
+                    day = scheme.background,
+                    night = scheme.background
                 )
             )
             .padding(8.dp),
@@ -105,7 +109,7 @@ private fun CalendarWidgetContent(
                 label = todayLabel,
                 date = today,
                 action = appAction,
-                themeColors = themeColors
+                scheme = scheme
             )
         }
 
@@ -113,7 +117,7 @@ private fun CalendarWidgetContent(
             items = todayEntries,
             itemId = { entry -> entryId(entry) }
         ) { entry ->
-            CalendarEntryRow(entry, themeColors, entryPalette, appAction)
+            CalendarEntryRow(entry, scheme, colors, appAction)
         }
 
         if (todayEntries.isNotEmpty()) {
@@ -127,7 +131,7 @@ private fun CalendarWidgetContent(
                 label = tomorrowLabel,
                 date = tomorrow,
                 action = appAction,
-                themeColors = themeColors
+                scheme = scheme
             )
         }
 
@@ -135,7 +139,7 @@ private fun CalendarWidgetContent(
             items = tomorrowEntries,
             itemId = { entry -> entryId(entry) }
         ) { entry ->
-            CalendarEntryRow(entry, themeColors, entryPalette, appAction)
+            CalendarEntryRow(entry, scheme, colors, appAction)
         }
     }
 }
@@ -145,15 +149,15 @@ private fun DateHeader(
     label: String,
     date: LocalDate,
     action: androidx.glance.action.Action,
-    themeColors: ThemeColors
+    scheme: ColorScheme
 ) {
     Row(
         modifier = GlanceModifier
             .fillMaxWidth()
             .background(
                 ColorProvider(
-                    day = themeColors.accent,
-                    night = themeColors.accent
+                    day = scheme.primary,
+                    night = scheme.primary
                 )
             )
             .clickable(action)
@@ -165,8 +169,8 @@ private fun DateHeader(
                 text = label,
                 style = TextStyle(
                     color = ColorProvider(
-                        day = themeColors.textOnAccent,
-                        night = themeColors.textOnAccent
+                        day = scheme.onPrimary,
+                        night = scheme.onPrimary
                     ),
                     fontWeight = FontWeight.Bold,
                     fontSize = 13.sp
@@ -177,8 +181,8 @@ private fun DateHeader(
                 text = formatDate(date),
                 style = TextStyle(
                     color = ColorProvider(
-                        day = themeColors.textOnAccent,
-                        night = themeColors.textOnAccent
+                        day = scheme.onPrimary,
+                        night = scheme.onPrimary
                     ),
                     fontSize = 11.sp
                 )
@@ -190,11 +194,11 @@ private fun DateHeader(
 @Composable
 private fun CalendarEntryRow(
     entry: CalendarEntry,
-    themeColors: ThemeColors,
-    entryPalette: Map<String, EntryColorDef>,
+    scheme: ColorScheme,
+    colors: StapikColors,
     action: androidx.glance.action.Action
 ) {
-    val entryColor = entryPalette[entry.color] ?: entryPalette.getValue("default")
+    val entryColor = entryColorFor(colors, scheme, entry.color)
     val modifier = GlanceModifier
         .fillMaxWidth()
         .clickable(action)
@@ -212,8 +216,8 @@ private fun CalendarEntryRow(
                 text = entry.name,
                 style = TextStyle(
                     color = ColorProvider(
-                        day = entryColor.textColor,
-                        night = entryColor.textColor
+                        day = entryColor.content,
+                        night = entryColor.content
                     ),
                     fontSize = 13.sp
                 )
@@ -226,8 +230,8 @@ private fun CalendarEntryRow(
                 .height(1.dp)
                 .background(
                     ColorProvider(
-                        day = themeColors.borderDark,
-                        night = themeColors.borderDark
+                        day = colors.borderDark,
+                        night = colors.borderDark
                     )
                 )
         )

@@ -4,29 +4,12 @@
     <string name="loading">Ładowanie</string>
     <string name="no_entries">—</string>
     <string name="settings">Ustawienia</string>
-    <string name="menu_connect">Połącz</string>
-    <string name="menu_about">O programie</string>
-    <string name="connect_url_label">Adres serwera</string>
-    <string name="connect_key_label">Klucz API</string>
-    <string name="connect_save">Zapisz</string>
-    <string name="connect_saved_confirmation">Zapisano</string>
-    <string name="about_version_label">Wersja</string>
-    <string name="about_author_label">Autor</string>
-    <string name="about_github_label">Zobacz na GitHubie</string>
-    <string name="not_configured_message">Brak skonfigurowanego połączenia.</string>
-    <string name="not_configured_button">Przejdź do Połącz</string>
     <string name="error_no_network">Brak połączenia z siecią.</string>
     <string name="error_unauthorized">Nieprawidłowy adres serwera lub klucz API.</string>
     <string name="error_unknown">Coś poszło nie tak: %1$s</string>
     <string name="retry">Spróbuj ponownie</string>
-    <string name="connect_test_success">Połączono jako %1$s</string>
     <string name="error_not_found">Nie znaleziono kalendarza na serwerze. Sprawdź ustawienia połączenia.</string>
     <string name="cached_data_banner">Wyświetlam dane z cache z %1$s</string>
-    <string name="menu_theme">Motyw</string>
-    <string name="theme_classic">Klasyczny</string>
-    <string name="theme_classic_pink">Klasyczny róż</string>
-    <string name="theme_modern">Nowoczesny</string>
-    <string name="theme_dark">Ciemny</string>
     <string name="menu_notifications">Powiadomienia</string>
     <string name="notifications_toggle_label">Przypominaj o nadchodzących wpisach</string>
     <string name="notification_channel_name">Przypomnienia o wpisach</string>
@@ -37,8 +20,6 @@
     <string name="widget_tomorrow">Jutro</string>
     <string name="calendar_widget_name">Stapik Calendar</string>
     <string name="calendar_widget_description">Dzisiejsze i jutrzejsze wpisy z kalendarza.</string>
-    <string name="connect_scope_read_only">Klucz tylko do odczytu: wpisów nie można edytować.</string>
-    <string name="connect_scope_read_write">Klucz do odczytu i zapisu: możesz dodawać i edytować wpisy.</string>
     <string name="local_mode_banner">Praca lokalna, zmiany zapisują się na tym urządzeniu. Dotknij, aby połączyć z serwerem.</string>
     <string name="pending_changes_banner">Offline: lokalne zmiany zostaną wysłane na serwer, gdy będzie dostępny.</string>
     <string name="entry_dialog_add_title">Nowy wpis</string>
@@ -57,8 +38,4 @@
     <string name="conflict_read_only_hint">Ten klucz jest tylko do odczytu, więc lokalnych zmian nie można wysłać. Możesz tylko pobrać wersję z serwera.</string>
     <string name="conflict_keep_local">Zachowaj lokalne i wyślij na serwer</string>
     <string name="conflict_use_server">Pobierz z serwera (odrzuć zmiany lokalne)</string>
-    <string name="connect_disconnect_button">Odłącz</string>
-    <string name="connect_disconnect_title">Odłączyć od serwera?</string>
-    <string name="connect_disconnect_message">Aplikacja przejdzie w tryb lokalny. Wpisy zostają na tym urządzeniu i nadal możesz je edytować. Po ponownym połączeniu wybierzesz, którą wersję zachować.</string>
-    <string name="connect_disconnected_info">Odłączono. Praca lokalna.</string>
 </resources>

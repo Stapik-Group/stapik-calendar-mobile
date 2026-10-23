@@ -15,10 +15,11 @@ A mobile companion to [Stapik Calendar](https://github.com/Stapik-Group/stapik-c
 - **Sync decision on (re)connect** – if local changes differ from the server, a dialog lets you keep the local version (and send it to the server) or download the server version
 - **Home screen widget** – today's and tomorrow's entries in their colors, refreshed in the background every 3 hours; tapping it opens the app
 - **Event notifications** – reminders about entries happening today or tomorrow, checked in the background at 8:00, 11:00, 14:00, 17:00 and 20:00 (even when the app is closed, restored after a reboot); each entry is notified only once
-- **Themes & entry colors** – classic, classic pink, modern and dark themes, and the full entry color palette (red, orange, yellow, green, teal, blue, purple, pink, brown, gray)
+- **Themes & entry colors** – Classic, Classic Pink, Modern, Dark and Neoclassic, matching the desktop app, applied to every screen and to the home screen widget; entries use the theme's color palette (red, orange, yellow, green, teal, blue, purple, pink, brown, gray)
 - **Clickable links** – with a read-only key, tapping an entry that has a link opens it; when editing is available the link is opened from the entry editor
 - **Pull-to-refresh** – drag down to fetch the latest data on demand
-- **Encrypted connection config** – server URL and API key are encrypted with a key held in the Android Keystore before being stored on device
+- **Encrypted connection config** – server URL, API key and the optional passphrase are encrypted with a key held in the Android Keystore before being stored on device; the key and passphrase are masked on screen with a show/hide toggle
+- **End-to-end encryption** – an optional passphrase reads and writes cloud data that the desktop app encrypted (`stapik-e2e`)
 - **Multilingual UI** – Polish, English and German, following the phone's system language
 - **Retro aesthetic** – same raised-button, blue-navbar, grey-cell look as the desktop app
 
@@ -31,19 +32,26 @@ A mobile companion to [Stapik Calendar](https://github.com/Stapik-Group/stapik-c
 
 Requires [Android Studio](https://developer.android.com/studio) (Kotlin, Jetpack Compose).
 
-```bash
-git clone https://github.com/Stapik-Group/stapik-calendar-android
+The app uses the shared library [stapik-common-mobile](https://github.com/Stapik-Group/stapik-common-mobile) as a git submodule in `libs/stapik-common-mobile`, pinned to a release tag. Clone with `git clone --recurse-submodules`, or run `git submodule update --init` after a plain clone.
 
+The library is built together with the app, so it needs the Android SDK location too: either set `ANDROID_HOME`, or copy `local.properties` into `libs/stapik-common-mobile/`.
+
+To work on the library next to the app, put its path in `~/.gradle/gradle.properties`:
+
+```
+stapikCommonMobileDir=/path/to/stapik-common-mobile
 ```
 
 Open the project folder in Android Studio, let Gradle sync, then build/run via the green Run button or:
 
 ```bash
-./gradlew assembleDebug
+./gradlew :app:assembleDebug
 
 ```
 
 The resulting APK is at `app/build/outputs/apk/debug/app-debug.apk`.
+
+Pull requests from `develop` to `master` are built and tested by GitHub Actions; a `v*` tag builds a signed release APK (secrets `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`).
 
 ## Installation
 
@@ -62,7 +70,7 @@ Or transfer the APK to the device and open it directly (requires allowing instal
 
 ## Cloud Sync
 
-The app works out of the box in local mode. To sync, open the settings menu (gear icon, bottom right) – **Connect**, and enter the same server URL and API key configured on the desktop app (**File – Connect** there).
+The app works out of the box in local mode. To sync, open the settings menu (gear icon, bottom right) – **Connect**, and enter the same server URL and API key configured on the desktop app (**File – Connect** there). If the desktop app encrypts the data end-to-end, enter the same passphrase in the optional passphrase field; without it the app reports that the cloud data is encrypted.
 
 The app fetches `calendar.json` from the server on startup, whenever you return to the calendar after connecting, whenever you pull to refresh, and periodically in the background (widget and notification checks). After every edit it sends the calendar back to the server.
 
@@ -73,7 +81,7 @@ The app fetches `calendar.json` from the server on startup, whenever you return 
 
 ### Local mode and disconnecting
 
-Without a connection, entries are stored only on the device and can be edited freely. The **Connect** screen has a **Disconnect** button that removes the saved server URL and API key and switches the app to local mode; entries stay on the device.
+Without a connection, entries are stored only on the device and can be edited freely. The **Connect** screen has a **Disconnect** button that removes the saved server URL, API key and passphrase and switches the app to local mode; entries stay on the device.
 
 ### Resolving differences
 

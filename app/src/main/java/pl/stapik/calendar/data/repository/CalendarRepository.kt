@@ -13,9 +13,15 @@ import pl.stapik.calendar.data.config.ApiConfigStorage
 import pl.stapik.calendar.data.model.CalendarEntry
 import pl.stapik.calendar.data.model.CalendarPayload
 import pl.stapik.calendar.data.model.CalendarSyncEnvelope
-import pl.stapik.calendar.data.model.DocumentResponse
-import pl.stapik.calendar.data.model.DocumentWriteRequest
-import pl.stapik.calendar.data.network.NetworkModule
+import pl.stapik.common.cloud.CloudConfig
+import pl.stapik.common.cloud.HttpCloudGateway
+import pl.stapik.common.cloud.HttpTransport
+import pl.stapik.common.cloud.OkHttpTransport
+import pl.stapik.common.model.SlotKey
+import pl.stapik.common.sync.CloudError
+import pl.stapik.common.sync.CloudException
+import pl.stapik.common.sync.CloudGateway
+import pl.stapik.common.sync.RemoteDocument
 
 data class CalendarFetchResult(
     val entries: List<CalendarEntry>,
@@ -25,12 +31,28 @@ data class CalendarFetchResult(
 
 enum class SyncResolution { NONE, KEEP_LOCAL, USE_SERVER }
 
+/** The server answered, but it has no calendar document in its slot. */
+class CalendarNotFoundException : Exception("No calendar document on the server")
+
 class CalendarRepository(
     private val apiConfigStorage: ApiConfigStorage,
-    private val cacheStorage: CalendarCacheStorage
+    private val cacheStorage: CalendarCacheStorage,
+    private val transport: HttpTransport = OkHttpTransport()
 ) {
     private val json = Json { ignoreUnknownKeys = true }
     private val writeJson = Json { ignoreUnknownKeys = true; encodeDefaults = true }
+
+    // The gateway keeps the derived end-to-end key, which is slow to compute, so it is reused
+    // for as long as the configuration stays the same.
+    private var gateway: Pair<ApiConfig, CloudGateway>? = null
+
+    @Synchronized
+    private fun gatewayFor(config: ApiConfig): CloudGateway {
+        gateway?.let { (known, ready) -> if (known == config) return ready }
+        val created = HttpCloudGateway(CloudConfig(config.serverUrl, config.apiKey, config.passphrase), transport)
+        gateway = config to created
+        return created
+    }
 
     suspend fun fetchEntries(resolution: SyncResolution = SyncResolution.NONE): CalendarFetchOutcome =
         lock.withLock { sync(resolution) }
@@ -60,7 +82,7 @@ class CalendarRepository(
             ?: return CalendarFetchOutcome.LocalOnly(cached ?: CachedCalendar(entries = emptyList(), updatedAt = ""))
 
         val server = runCatching { download(config) }.getOrElse { error ->
-            return if (error is SerializationException || cached == null) {
+            return if (error is SerializationException || error.isUnreadable() || cached == null) {
                 CalendarFetchOutcome.Failure(error)
             } else {
                 CalendarFetchOutcome.Cached(cached, error)
@@ -114,19 +136,21 @@ class CalendarRepository(
         return modifiedAt.isAfter(serverUpdatedAt)
     }
 
+    private fun Throwable.isUnreadable(): Boolean = (this as? CloudException)?.error is CloudError.Unreadable
+
     private suspend fun download(config: ApiConfig): CalendarFetchResult {
-        val api = NetworkModule.createApi(baseUrl = config.baseUrl)
-        val me = api.getMe(apiKey = config.apiKey)
-        val document = api.getDocument(slotKey = SLOT_KEY, apiKey = config.apiKey)
+        val cloud = gatewayFor(config)
+        val info = cloud.info()
+        val document = cloud.read(SLOT) ?: throw CalendarNotFoundException()
         val envelope = json.decodeFromString<CalendarSyncEnvelope>(document.content)
         return CalendarFetchResult(
             entries = envelope.payload.entries,
             updatedAt = document.updatedAt,
-            scope = me.scope
+            scope = info.scope.name
         )
     }
 
-    private suspend fun write(config: ApiConfig, entries: List<CalendarEntry>, baseUpdatedAt: String): DocumentResponse {
+    private suspend fun write(config: ApiConfig, entries: List<CalendarEntry>, baseUpdatedAt: String): RemoteDocument {
         val now = Instant.now().truncatedTo(ChronoUnit.SECONDS).toString()
         val content = writeJson.encodeToString(
             CalendarSyncEnvelope(
@@ -134,15 +158,11 @@ class CalendarRepository(
                 payload = CalendarPayload(entries = entries, lastUpdate = now)
             )
         )
-        return NetworkModule.createApi(baseUrl = config.baseUrl).writeDocument(
-            slotKey = SLOT_KEY,
-            apiKey = config.apiKey,
-            body = DocumentWriteRequest(content = content, clientLastKnownUpdate = baseUpdatedAt)
-        )
+        return gatewayFor(config).write(SLOT, content, baseUpdatedAt)
     }
 
     private companion object {
-        const val SLOT_KEY = "calendar.json"
+        val SLOT = SlotKey("calendar.json")
         const val SCOPE_READ_WRITE = "READ_WRITE"
         val lock = Mutex()
     }

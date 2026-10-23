@@ -3,8 +3,6 @@ package pl.stapik.calendar.ui.calendar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import java.net.SocketTimeoutException
-import java.net.UnknownHostException
 import java.time.LocalDate
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,7 +12,6 @@ import pl.stapik.calendar.data.model.CalendarEntry
 import pl.stapik.calendar.data.repository.CalendarFetchOutcome
 import pl.stapik.calendar.data.repository.CalendarRepository
 import pl.stapik.calendar.data.repository.SyncResolution
-import retrofit2.HttpException
 
 class CalendarViewModel(private val repository: CalendarRepository) : ViewModel() {
     private val _uiState = MutableStateFlow<CalendarUiState>(CalendarUiState.Loading)
@@ -138,16 +135,7 @@ class CalendarViewModel(private val repository: CalendarRepository) : ViewModel(
         mapNotNull { entry -> runCatching { LocalDate.parse(entry.date) }.getOrNull()?.let { it to entry } }
             .groupBy({ it.first }, { it.second })
 
-    private fun mapError(error: Throwable): CalendarUiState = when (error) {
-        is UnknownHostException, is SocketTimeoutException ->
-            CalendarUiState.Error(CalendarLoadError.NoNetwork)
-        is HttpException -> when (error.code()) {
-            401, 403 -> CalendarUiState.Error(CalendarLoadError.Unauthorized)
-            404 -> CalendarUiState.Error(CalendarLoadError.NotFound)
-            else -> CalendarUiState.Error(CalendarLoadError.Unknown(error.message()))
-        }
-        else -> CalendarUiState.Error(CalendarLoadError.Unknown(error.message ?: "Unknown error"))
-    }
+    private fun mapError(error: Throwable): CalendarUiState = CalendarUiState.Error(error.toCalendarLoadError())
 
     private companion object {
         const val SCOPE_READ_WRITE = "READ_WRITE"

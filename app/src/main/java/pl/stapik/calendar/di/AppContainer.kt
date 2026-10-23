@@ -20,7 +20,7 @@ class AppContainer(context: Context) {
     val configStorage: ApiConfigStorage = connectionStorage
 
     /** The one repository of the process: the screen, the widget and the reminders sync through it. */
-    val calendarRepository = CalendarRepository(configStorage, DataStoreCalendarCacheStorage(appContext))
+    val calendarRepository = CalendarRepository(configStorage, DataStoreCalendarCacheStorage(appContext), transport)
 
     /** Builds the controller of the connect form, prefilled with the saved connection. */
     fun newConnectController(initial: CloudConfig?): ConnectController =

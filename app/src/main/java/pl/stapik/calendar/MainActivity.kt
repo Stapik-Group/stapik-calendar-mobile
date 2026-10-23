@@ -13,7 +13,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import pl.stapik.calendar.data.config.DataStoreApiConfigStorage
 import pl.stapik.calendar.data.notifications.DataStoreNotificationPreferencesStorage
 import pl.stapik.calendar.data.theme.DataStoreThemeStorage
 import pl.stapik.calendar.ui.root.AppRoot
@@ -27,7 +26,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val apiConfigStorage = remember { DataStoreApiConfigStorage(applicationContext) }
+            val apiConfigStorage = appContainer.configStorage
             val themeStorage = remember { DataStoreThemeStorage(applicationContext) }
             val notificationPreferencesStorage = remember { DataStoreNotificationPreferencesStorage(applicationContext) }
 

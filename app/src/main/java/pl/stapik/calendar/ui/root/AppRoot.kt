@@ -1,19 +1,16 @@
 package pl.stapik.calendar.ui.root
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import pl.stapik.calendar.R
 import pl.stapik.calendar.data.config.ApiConfigStorage
-import pl.stapik.calendar.data.config.ApiSchemaGuard
 import pl.stapik.calendar.data.notifications.NotificationPreferencesStorage
 import pl.stapik.calendar.data.theme.ThemeStorage
 import pl.stapik.calendar.notifications.NotificationScheduler
@@ -37,8 +34,6 @@ fun AppRoot(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val apiSchemaGuard = remember { ApiSchemaGuard(context.applicationContext, apiConfigStorage) }
-    var schemaChecked by remember { mutableStateOf(false) }
     val currentTheme by themeStorage.theme.collectAsState(initial = AppTheme.CLASSIC)
     val notificationsEnabled by notificationPreferencesStorage.enabled.collectAsState(initial = false)
 
@@ -48,26 +43,6 @@ fun AppRoot(
         } else {
             NotificationScheduler.cancel(context.applicationContext)
         }
-    }
-
-
-    // Must run before any screen reads the stored config, otherwise a stale
-    // pre-migration config could be used against the new API and fail with a
-    // confusing raw network error instead of a clean redirect to Connect.
-    LaunchedEffect(Unit) {
-        apiSchemaGuard.ensureCurrentSchema()
-        schemaChecked = true
-    }
-
-    if (!schemaChecked) {
-        val splashColors = ThemePalettes.forTheme(currentTheme)
-        Box(
-            modifier = modifier.fillMaxSize().background(splashColors.windowBackground),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator(color = splashColors.textDark)
-        }
-        return
     }
 
     CompositionLocalProvider(

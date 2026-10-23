@@ -5,8 +5,8 @@ import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.updateAll
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import pl.stapik.calendar.appContainer
 import pl.stapik.calendar.data.cache.DataStoreCalendarCacheStorage
-import pl.stapik.calendar.data.config.DataStoreApiConfigStorage
 import pl.stapik.calendar.data.repository.CalendarRepository
 
 class WidgetRefreshWorker(
@@ -17,7 +17,7 @@ class WidgetRefreshWorker(
     override suspend fun doWork(): Result {
         runCatching {
             CalendarRepository(
-                apiConfigStorage = DataStoreApiConfigStorage(applicationContext),
+                apiConfigStorage = applicationContext.appContainer.configStorage,
                 cacheStorage = DataStoreCalendarCacheStorage(applicationContext)
             ).fetchEntries()
         }

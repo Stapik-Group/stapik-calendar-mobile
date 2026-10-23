@@ -12,8 +12,8 @@ import androidx.work.WorkerParameters
 import java.time.LocalDate
 import kotlinx.coroutines.flow.first
 import pl.stapik.calendar.R
+import pl.stapik.calendar.appContainer
 import pl.stapik.calendar.data.cache.DataStoreCalendarCacheStorage
-import pl.stapik.calendar.data.config.DataStoreApiConfigStorage
 import pl.stapik.calendar.data.notifications.DataStoreNotificationPreferencesStorage
 import pl.stapik.calendar.data.notifications.DataStoreNotifiedEntriesStorage
 import pl.stapik.calendar.data.repository.CalendarFetchOutcome
@@ -30,7 +30,7 @@ class EntryReminderWorker(
         if (!preferencesStorage.enabled.first()) return Result.success()
 
         val repository = CalendarRepository(
-            apiConfigStorage = DataStoreApiConfigStorage(applicationContext),
+            apiConfigStorage = applicationContext.appContainer.configStorage,
             cacheStorage = DataStoreCalendarCacheStorage(applicationContext)
         )
 

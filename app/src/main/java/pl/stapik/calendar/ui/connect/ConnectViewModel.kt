@@ -26,7 +26,7 @@ class ConnectViewModel(
     init {
         viewModelScope.launch {
             storage.load()?.let { config ->
-                _uiState.update { it.copy(baseUrl = config.baseUrl, apiKey = config.apiKey, isConnected = true) }
+                _uiState.update { it.copy(baseUrl = config.serverUrl, apiKey = config.apiKey, isConnected = true) }
             }
         }
     }
@@ -42,7 +42,7 @@ class ConnectViewModel(
             runCatching {
                 NetworkModule.createApi(baseUrl = baseUrl).getMe(apiKey = apiKey)
             }.onSuccess { me ->
-                storage.save(ApiConfig(baseUrl = baseUrl, apiKey = apiKey))
+                storage.save(ApiConfig(serverUrl = baseUrl, apiKey = apiKey))
                 _uiState.update {
                     it.copy(
                         isTesting = false,

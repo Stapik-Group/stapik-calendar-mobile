@@ -115,7 +115,7 @@ class CalendarRepository(
     }
 
     private suspend fun download(config: ApiConfig): CalendarFetchResult {
-        val api = NetworkModule.createApi(baseUrl = config.baseUrl)
+        val api = NetworkModule.createApi(baseUrl = config.serverUrl)
         val me = api.getMe(apiKey = config.apiKey)
         val document = api.getDocument(slotKey = SLOT_KEY, apiKey = config.apiKey)
         val envelope = json.decodeFromString<CalendarSyncEnvelope>(document.content)
@@ -134,7 +134,7 @@ class CalendarRepository(
                 payload = CalendarPayload(entries = entries, lastUpdate = now)
             )
         )
-        return NetworkModule.createApi(baseUrl = config.baseUrl).writeDocument(
+        return NetworkModule.createApi(baseUrl = config.serverUrl).writeDocument(
             slotKey = SLOT_KEY,
             apiKey = config.apiKey,
             body = DocumentWriteRequest(content = content, clientLastKnownUpdate = baseUpdatedAt)

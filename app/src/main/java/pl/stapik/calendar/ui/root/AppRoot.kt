@@ -11,9 +11,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -35,11 +35,6 @@ import pl.stapik.calendar.notifications.NotificationScheduler
 import pl.stapik.calendar.ui.calendar.WeekPagerScreen
 import pl.stapik.calendar.ui.navigation.AppScreen
 import pl.stapik.calendar.ui.notifications.NotificationsScreen
-import pl.stapik.calendar.ui.theme.EntryPalettes
-import pl.stapik.calendar.ui.theme.LocalEntryPalette
-import pl.stapik.calendar.ui.theme.LocalThemeColors
-import pl.stapik.calendar.ui.theme.ThemePalettes
-import pl.stapik.calendar.ui.theme.toAppTheme
 import pl.stapik.calendar.util.AppInfo
 import pl.stapik.common.cloud.CloudConfig
 import pl.stapik.common.presentation.ConnectController
@@ -87,74 +82,67 @@ fun AppRoot(
         }
     }
 
-    val appTheme = currentTheme.toAppTheme()
     StapikTheme(currentTheme) {
-        CompositionLocalProvider(
-            LocalThemeColors provides ThemePalettes.forTheme(appTheme),
-            LocalEntryPalette provides EntryPalettes.forTheme(appTheme)
-        ) {
-            val themeColors = LocalThemeColors.current
-            BackHandler(enabled = screen == AppScreen.Notifications) {
-                screen = AppScreen.Settings
-            }
-            Scaffold(
-                modifier = modifier,
-                containerColor = themeColors.windowBackground,
-                contentWindowInsets = WindowInsets(0, 0, 0, 0),
-                floatingActionButton = {
-                    if (screen == AppScreen.Calendar) {
-                        Box(modifier = Modifier.navigationBarsPadding()) {
-                            FloatingActionButton(
-                                onClick = { screen = AppScreen.Settings },
-                                containerColor = themeColors.cellBackground,
-                                contentColor = themeColors.textDark
-                            ) {
-                                Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings))
-                            }
+        BackHandler(enabled = screen == AppScreen.Notifications) {
+            screen = AppScreen.Settings
+        }
+        Scaffold(
+            modifier = modifier,
+            containerColor = MaterialTheme.colorScheme.background,
+            contentWindowInsets = WindowInsets(0, 0, 0, 0),
+            floatingActionButton = {
+                if (screen == AppScreen.Calendar) {
+                    Box(modifier = Modifier.navigationBarsPadding()) {
+                        FloatingActionButton(
+                            onClick = { screen = AppScreen.Settings },
+                            containerColor = StapikTheme.colors.button,
+                            contentColor = MaterialTheme.colorScheme.onBackground
+                        ) {
+                            Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings))
                         }
                     }
                 }
-            ) { innerPadding ->
-                Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
-                    when (screen) {
-                        AppScreen.Calendar -> WeekPagerScreen(
-                            repository = repository,
-                            onNavigateToConnect = { screen = AppScreen.Settings }
-                        )
+            }
+        ) { innerPadding ->
+            Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+                when (screen) {
+                    AppScreen.Calendar -> WeekPagerScreen(
+                        repository = repository,
+                        onNavigateToConnect = { screen = AppScreen.Settings }
+                    )
 
-                        AppScreen.Settings -> {
-                            val connectController = remember {
-                                newConnectController(savedConfig?.let { CloudConfig(it.serverUrl, it.apiKey, it.passphrase) })
-                            }
-                            SettingsFlow(
-                                app = appDefinition,
-                                themeId = currentTheme,
-                                onThemeChange = { theme -> scope.launch { themeStorage.setTheme(theme) } },
-                                connectController = connectController,
-                                connected = savedConfig != null,
-                                onConnected = { scope.launch { savedConfig = apiConfigStorage.load() } },
-                                onDisconnected = {
-                                    savedConfig = null
-                                    // The connection is already cleared; this also resets the cached sync state.
-                                    scope.launch { repository.disconnect() }
-                                },
-                                onClose = { screen = AppScreen.Calendar },
-                                modifier = Modifier.fillMaxSize(),
-                                extra = {
-                                    StapikButton(
-                                        text = stringResource(R.string.menu_notifications),
-                                        onClick = { screen = AppScreen.Notifications },
-                                        modifier = Modifier.fillMaxWidth()
-                                    )
-                                }
-                            )
+                    AppScreen.Settings -> {
+                        val connectController = remember {
+                            newConnectController(savedConfig?.let { CloudConfig(it.serverUrl, it.apiKey, it.passphrase) })
                         }
-
-                        AppScreen.Notifications -> NotificationsScreen(
-                            storage = notificationPreferencesStorage,
-                            onBack = { screen = AppScreen.Settings }
+                        SettingsFlow(
+                            app = appDefinition,
+                            themeId = currentTheme,
+                            onThemeChange = { theme -> scope.launch { themeStorage.setTheme(theme) } },
+                            connectController = connectController,
+                            connected = savedConfig != null,
+                            onConnected = { scope.launch { savedConfig = apiConfigStorage.load() } },
+                            onDisconnected = {
+                                savedConfig = null
+                                // The connection is already cleared; this also resets the cached sync state.
+                                scope.launch { repository.disconnect() }
+                            },
+                            onClose = { screen = AppScreen.Calendar },
+                            modifier = Modifier.fillMaxSize(),
+                            extra = {
+                                StapikButton(
+                                    text = stringResource(R.string.menu_notifications),
+                                    onClick = { screen = AppScreen.Notifications },
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
                         )
                     }
+
+                    AppScreen.Notifications -> NotificationsScreen(
+                        storage = notificationPreferencesStorage,
+                        onBack = { screen = AppScreen.Settings }
+                    )
                 }
             }
         }

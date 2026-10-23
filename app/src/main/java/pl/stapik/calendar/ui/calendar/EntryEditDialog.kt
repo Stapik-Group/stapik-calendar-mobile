@@ -41,7 +41,8 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import pl.stapik.calendar.R
 import pl.stapik.calendar.data.model.CalendarEntry
-import pl.stapik.calendar.ui.theme.LocalEntryPalette
+import pl.stapik.calendar.ui.theme.EntryColorKeys
+import pl.stapik.calendar.ui.theme.entryColorFor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,7 +53,6 @@ fun EntryEditDialog(
     onDelete: (() -> Unit)?,
     onDismiss: () -> Unit
 ) {
-    val entryPalette = LocalEntryPalette.current
     val uriHandler = LocalUriHandler.current
     val locale = LocalConfiguration.current.locales[0]
     val dateFormatter = remember(locale) {
@@ -107,7 +107,7 @@ fun EntryEditDialog(
                 Text(stringResource(R.string.entry_color_label), fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {
-                    entryPalette.entries.forEach { (key, definition) ->
+                    EntryColorKeys.forEach { key ->
                         val selectedModifier = if (key == color) {
                             Modifier.border(3.dp, MaterialTheme.colorScheme.onSurface)
                         } else {
@@ -117,7 +117,7 @@ fun EntryEditDialog(
                             modifier = Modifier
                                 .padding(end = 8.dp)
                                 .size(32.dp)
-                                .background(definition.background)
+                                .background(entryColorFor(key).background)
                                 .then(selectedModifier)
                                 .clickable { color = key }
                         )

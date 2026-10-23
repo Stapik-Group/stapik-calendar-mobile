@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
@@ -20,9 +21,9 @@ import java.time.LocalDate
 import kotlinx.coroutines.launch
 import pl.stapik.calendar.data.model.CalendarEntry
 import pl.stapik.calendar.data.repository.CalendarRepository
-import pl.stapik.calendar.ui.theme.LocalThemeColors
-import pl.stapik.calendar.ui.theme.themedSurface
 import pl.stapik.calendar.R
+import pl.stapik.common.ui.components.themedSurface
+import pl.stapik.common.ui.theme.StapikTheme
 
 @Composable
 fun WeekPagerScreen(
@@ -37,7 +38,8 @@ fun WeekPagerScreen(
     val pagerState = rememberPagerState(initialPage = WeekPaging.INITIAL_PAGE) { WeekPaging.PAGE_COUNT }
     val coroutineScope = rememberCoroutineScope()
     val today = remember { LocalDate.now() }
-    val themeColors = LocalThemeColors.current
+    val scheme = MaterialTheme.colorScheme
+    val colors = StapikTheme.colors
     val conflict by viewModel.conflict.collectAsStateWithLifecycle()
     var editor by remember { mutableStateOf<EntryEditorTarget?>(null) }
 
@@ -65,7 +67,7 @@ fun WeekPagerScreen(
         )
     }
 
-    Column(modifier = modifier.fillMaxSize().background(themeColors.windowBackground)) {
+    Column(modifier = modifier.fillMaxSize().background(scheme.background)) {
         val currentWeekStart = WeekPaging.pageToWeekStart(pagerState.currentPage)
 
         WeekNavBar(
@@ -108,12 +110,12 @@ fun WeekPagerScreen(
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .background(themeColors.cellBackground)
+                                    .background(colors.button)
                                     .let { if (current.isLocalMode) it.clickable(onClick = onNavigateToConnect) else it }
                                     .padding(8.dp),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(bannerText, color = themeColors.textDark)
+                                Text(bannerText, color = scheme.onBackground)
                             }
                         }
                         HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
@@ -148,9 +150,8 @@ internal fun formatCachedTimestamp(updatedAt: String?): String {
 
 @Composable
 private fun CenteredMessage(text: String, modifier: Modifier = Modifier) {
-    val themeColors = LocalThemeColors.current
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text, color = themeColors.textDark)
+        Text(text, color = MaterialTheme.colorScheme.onBackground)
     }
 }
 
@@ -161,18 +162,19 @@ private fun CenteredMessageWithAction(
     onAction: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val themeColors = LocalThemeColors.current
+    val scheme = MaterialTheme.colorScheme
+    val colors = StapikTheme.colors
     Box(modifier = modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(message, color = themeColors.textDark)
+            Text(message, color = scheme.onBackground)
             Spacer(modifier = Modifier.height(12.dp))
             Box(
                 modifier = Modifier
-                    .themedSurface(themeColors = themeColors, backgroundColor = themeColors.cellBackground, raised = true)
+                    .themedSurface(colors, colors.button, raised = true)
                     .clickable(onClick = onAction)
                     .padding(horizontal = 20.dp, vertical = 10.dp)
             ) {
-                Text(actionLabel, color = themeColors.textDark, fontWeight = FontWeight.Bold)
+                Text(actionLabel, color = scheme.onBackground, fontWeight = FontWeight.Bold)
             }
         }
     }

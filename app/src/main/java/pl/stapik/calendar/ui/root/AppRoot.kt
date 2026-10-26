@@ -68,6 +68,7 @@ fun AppRoot(
     val scope = rememberCoroutineScope()
     val currentTheme by themeStorage.theme.collectAsState(initial = ThemeId.CLASSIC)
     val notificationsEnabled by notificationPreferencesStorage.enabled.collectAsState(initial = false)
+    val connectionProblem by apiConfigStorage.problem.collectAsState()
     var savedConfig by remember { mutableStateOf<CloudConfig?>(null) }
     var screen by remember { mutableStateOf<AppScreen>(AppScreen.Calendar) }
 
@@ -107,6 +108,7 @@ fun AppRoot(
                 when (screen) {
                     AppScreen.Calendar -> WeekPagerScreen(
                         repository = repository,
+                        connectionProblem = connectionProblem,
                         onNavigateToConnect = { screen = AppScreen.Settings }
                     )
 

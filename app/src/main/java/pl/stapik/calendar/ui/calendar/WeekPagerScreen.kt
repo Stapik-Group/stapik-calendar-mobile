@@ -18,6 +18,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import java.time.LocalDate
 import kotlinx.coroutines.launch
+import pl.stapik.calendar.data.config.ConnectionProblem
 import pl.stapik.calendar.data.model.CalendarEntry
 import pl.stapik.calendar.data.repository.CalendarRepository
 import pl.stapik.calendar.R
@@ -27,6 +28,7 @@ import pl.stapik.common.ui.theme.StapikTheme
 @Composable
 fun WeekPagerScreen(
     repository: CalendarRepository,
+    connectionProblem: ConnectionProblem?,
     onNavigateToConnect: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -100,6 +102,7 @@ fun WeekPagerScreen(
                 is CalendarUiState.Success -> {
                     Column(modifier = Modifier.fillMaxSize()) {
                         val bannerText = when {
+                            current.isLocalMode && connectionProblem != null -> stringResource(connectionProblem.messageRes())
                             current.isLocalMode -> stringResource(R.string.local_mode_banner)
                             current.isStale && current.hasPendingChanges -> stringResource(R.string.pending_changes_banner)
                             current.isStale -> stringResource(R.string.cached_data_banner, formatCachedTimestamp(current.updatedAt))
@@ -110,7 +113,7 @@ fun WeekPagerScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .background(colors.button)
-                                    .let { if (current.isLocalMode) it.clickable(onClick = onNavigateToConnect) else it }
+                                    .let { if (current.isLocalMode && connectionProblem != ConnectionProblem.NEWER_VERSION) it.clickable(onClick = onNavigateToConnect) else it }
                                     .padding(8.dp),
                                 contentAlignment = Alignment.Center
                             ) {
@@ -134,6 +137,12 @@ fun WeekPagerScreen(
             }
         }
     }
+}
+
+private fun ConnectionProblem.messageRes(): Int = when (this) {
+    ConnectionProblem.NEWER_VERSION -> R.string.connection_problem_newer_version
+    ConnectionProblem.UNREADABLE -> R.string.connection_problem_unreadable
+    ConnectionProblem.RESET -> R.string.connection_problem_reset
 }
 
 internal fun formatCachedTimestamp(updatedAt: String?): String {

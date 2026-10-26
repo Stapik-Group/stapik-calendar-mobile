@@ -23,6 +23,9 @@
     <string name="calendar_widget_description">Heutige und morgige Kalendereinträge</string>
 
     <string name="local_mode_banner">Lokaler Modus, Änderungen werden auf diesem Gerät gespeichert. Tippe, um dich mit dem Server zu verbinden.</string>
+    <string name="connection_problem_newer_version">Die gespeicherte Verbindung stammt von einer neueren Version der App. Aktualisiere die App, um sie zu verwenden.</string>
+    <string name="connection_problem_unreadable">Die gespeicherte Verbindung kann nicht gelesen werden. Tippe, um dich erneut zu verbinden.</string>
+    <string name="connection_problem_reset">Die gespeicherte Verbindung ist nicht mehr gültig. Tippe, um dich erneut zu verbinden.</string>
     <string name="pending_changes_banner">Offline: Lokale Änderungen werden an den Server gesendet, sobald er erreichbar ist.</string>
     <string name="entry_dialog_add_title">Neuer Eintrag</string>
     <string name="entry_dialog_edit_title">Eintrag bearbeiten</string>

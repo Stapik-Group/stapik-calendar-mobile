@@ -1,13 +1,15 @@
 package pl.stapik.calendar.data.config
 
 import android.content.Context
-import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
 import java.io.File
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
@@ -57,34 +59,40 @@ class ConnectionApiConfigStorage(context: Context) : ApiConfigStorage {
     )
 
     private val lock = Mutex()
+    private val mutableProblem = MutableStateFlow<ConnectionProblem?>(null)
+
+    override val problem: StateFlow<ConnectionProblem?> = mutableProblem.asStateFlow()
 
     override suspend fun load(): CloudConfig? = lock.withLock {
         withContext(Dispatchers.IO) {
-            when (val result = store.load()) {
-                is ConfigLoad.Loaded -> result.config
-                ConfigLoad.None -> null
-                else -> {
-                    Log.w(TAG, "Saved connection is not usable: ${result::class.simpleName}")
-                    null
-                }
-            }
+            val result = store.load()
+            mutableProblem.value = problemOf(result)
+            (result as? ConfigLoad.Loaded)?.config
         }
     }
 
     override suspend fun save(config: CloudConfig) {
         lock.withLock {
             withContext(Dispatchers.IO) { store.save(config) }
+            mutableProblem.value = null
         }
     }
 
     override suspend fun clear() {
         lock.withLock {
             withContext(Dispatchers.IO) { store.clear() }
+            mutableProblem.value = null
         }
     }
 
+    private fun problemOf(result: ConfigLoad): ConnectionProblem? = when (result) {
+        is ConfigLoad.Loaded, ConfigLoad.None -> null
+        is ConfigLoad.SchemaReset -> ConnectionProblem.RESET
+        is ConfigLoad.NewerSchema -> ConnectionProblem.NEWER_VERSION
+        ConfigLoad.Unreadable -> ConnectionProblem.UNREADABLE
+    }
+
     private companion object {
-        const val TAG = "ConnectionApiConfigStorage"
         const val SCHEMA_VERSION = 1
         const val KEY_ALIAS = "stapikcalendar_connection_key"
         const val LEGACY_KEY_ALIAS = "stapikcalendar_api_config_key"

@@ -21,6 +21,9 @@
     <string name="calendar_widget_name">Stapik Calendar</string>
     <string name="calendar_widget_description">Today\'s and tomorrow\'s calendar entries</string>
     <string name="local_mode_banner">Working locally, changes are saved on this device. Tap to connect to the server.</string>
+    <string name="connection_problem_newer_version">The saved connection comes from a newer version of the app. Update the app to use it.</string>
+    <string name="connection_problem_unreadable">The saved connection cannot be read. Tap to connect again.</string>
+    <string name="connection_problem_reset">The saved connection is no longer valid. Tap to connect again.</string>
     <string name="pending_changes_banner">Offline: local changes will be sent to the server when it is reachable.</string>
     <string name="entry_dialog_add_title">New entry</string>
     <string name="entry_dialog_edit_title">Edit entry</string>

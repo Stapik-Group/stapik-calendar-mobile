@@ -22,6 +22,9 @@
     <string name="calendar_widget_name">Stapik Calendar</string>
     <string name="calendar_widget_description">Dzisiejsze i jutrzejsze wpisy z kalendarza.</string>
     <string name="local_mode_banner">Praca lokalna, zmiany zapisują się na tym urządzeniu. Dotknij, aby połączyć z serwerem.</string>
+    <string name="connection_problem_newer_version">Zapisane połączenie pochodzi z nowszej wersji aplikacji. Zaktualizuj aplikację, aby z niego korzystać.</string>
+    <string name="connection_problem_unreadable">Nie można odczytać zapisanego połączenia. Dotknij, aby połączyć ponownie.</string>
+    <string name="connection_problem_reset">Zapisane połączenie nie jest już ważne. Dotknij, aby połączyć ponownie.</string>
     <string name="pending_changes_banner">Offline: lokalne zmiany zostaną wysłane na serwer, gdy będzie dostępny.</string>
     <string name="entry_dialog_add_title">Nowy wpis</string>
     <string name="entry_dialog_edit_title">Edytuj wpis</string>

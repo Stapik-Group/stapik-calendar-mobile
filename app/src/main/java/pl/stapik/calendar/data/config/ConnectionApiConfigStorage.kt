@@ -58,10 +58,10 @@ class ConnectionApiConfigStorage(context: Context) : ApiConfigStorage {
 
     private val lock = Mutex()
 
-    override suspend fun load(): ApiConfig? = lock.withLock {
+    override suspend fun load(): CloudConfig? = lock.withLock {
         withContext(Dispatchers.IO) {
             when (val result = store.load()) {
-                is ConfigLoad.Loaded -> ApiConfig(result.config.normalizedApiUrl, result.config.apiKey, result.config.passphrase)
+                is ConfigLoad.Loaded -> result.config
                 ConfigLoad.None -> null
                 else -> {
                     Log.w(TAG, "Saved connection is not usable: ${result::class.simpleName}")
@@ -71,9 +71,9 @@ class ConnectionApiConfigStorage(context: Context) : ApiConfigStorage {
         }
     }
 
-    override suspend fun save(config: ApiConfig) {
+    override suspend fun save(config: CloudConfig) {
         lock.withLock {
-            withContext(Dispatchers.IO) { store.save(CloudConfig(config.serverUrl, config.apiKey, config.passphrase)) }
+            withContext(Dispatchers.IO) { store.save(config) }
         }
     }
 

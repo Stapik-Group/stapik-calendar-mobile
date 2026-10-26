@@ -26,7 +26,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.launch
 import pl.stapik.calendar.R
-import pl.stapik.calendar.data.config.ApiConfig
 import pl.stapik.calendar.data.config.ApiConfigStorage
 import pl.stapik.calendar.data.notifications.NotificationPreferencesStorage
 import pl.stapik.calendar.data.repository.CalendarRepository
@@ -69,7 +68,7 @@ fun AppRoot(
     val scope = rememberCoroutineScope()
     val currentTheme by themeStorage.theme.collectAsState(initial = ThemeId.CLASSIC)
     val notificationsEnabled by notificationPreferencesStorage.enabled.collectAsState(initial = false)
-    var savedConfig by remember { mutableStateOf<ApiConfig?>(null) }
+    var savedConfig by remember { mutableStateOf<CloudConfig?>(null) }
     var screen by remember { mutableStateOf<AppScreen>(AppScreen.Calendar) }
 
     LaunchedEffect(Unit) { savedConfig = apiConfigStorage.load() }
@@ -113,7 +112,7 @@ fun AppRoot(
 
                     AppScreen.Settings -> {
                         val connectController = remember {
-                            newConnectController(savedConfig?.let { CloudConfig(it.serverUrl, it.apiKey, it.passphrase) })
+                            newConnectController(savedConfig)
                         }
                         SettingsFlow(
                             app = appDefinition,

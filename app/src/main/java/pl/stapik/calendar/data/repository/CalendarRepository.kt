@@ -8,7 +8,6 @@ import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import pl.stapik.calendar.data.cache.CachedCalendar
 import pl.stapik.calendar.data.cache.CalendarCacheStorage
-import pl.stapik.calendar.data.config.ApiConfig
 import pl.stapik.calendar.data.config.ApiConfigStorage
 import pl.stapik.calendar.data.model.CalendarEntry
 import pl.stapik.calendar.data.model.CalendarPayload
@@ -44,12 +43,12 @@ class CalendarRepository(
 
     // The gateway keeps the derived end-to-end key, which is slow to compute, so it is reused
     // for as long as the configuration stays the same.
-    private var gateway: Pair<ApiConfig, CloudGateway>? = null
+    private var gateway: Pair<CloudConfig, CloudGateway>? = null
 
     @Synchronized
-    private fun gatewayFor(config: ApiConfig): CloudGateway {
+    private fun gatewayFor(config: CloudConfig): CloudGateway {
         gateway?.let { (known, ready) -> if (known == config) return ready }
-        val created = HttpCloudGateway(CloudConfig(config.serverUrl, config.apiKey, config.passphrase), transport)
+        val created = HttpCloudGateway(config, transport)
         gateway = config to created
         return created
     }
@@ -138,7 +137,7 @@ class CalendarRepository(
 
     private fun Throwable.isUnreadable(): Boolean = (this as? CloudException)?.error is CloudError.Unreadable
 
-    private suspend fun download(config: ApiConfig): CalendarFetchResult {
+    private suspend fun download(config: CloudConfig): CalendarFetchResult {
         val cloud = gatewayFor(config)
         val info = cloud.info()
         val document = cloud.read(SLOT) ?: throw CalendarNotFoundException()
@@ -150,7 +149,7 @@ class CalendarRepository(
         )
     }
 
-    private suspend fun write(config: ApiConfig, entries: List<CalendarEntry>, baseUpdatedAt: String): RemoteDocument {
+    private suspend fun write(config: CloudConfig, entries: List<CalendarEntry>, baseUpdatedAt: String): RemoteDocument {
         val now = Instant.now().truncatedTo(ChronoUnit.SECONDS).toString()
         val content = writeJson.encodeToString(
             CalendarSyncEnvelope(

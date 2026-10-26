@@ -24,5 +24,10 @@ class AppContainer(context: Context) {
 
     /** Builds the controller of the connect form, prefilled with the saved connection. */
     fun newConnectController(initial: CloudConfig?): ConnectController =
-        ConnectController(connectionStorage.store, { config -> HttpCloudGateway(config, transport) }, initial)
+        ConnectController(
+            store = connectionStorage.store,
+            gatewayFactory = { config -> HttpCloudGateway(config, transport) },
+            documents = emptyList(),
+            initial = initial
+        )
 }

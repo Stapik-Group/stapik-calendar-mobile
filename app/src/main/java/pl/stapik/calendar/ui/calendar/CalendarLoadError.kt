@@ -14,6 +14,7 @@ sealed interface CalendarLoadError {
     data object NoNetwork : CalendarLoadError
     data object Unauthorized : CalendarLoadError
     data object NotFound : CalendarLoadError
+    data object Redirected : CalendarLoadError
 
     /** The cloud data cannot be read (encrypted, wrong passphrase, newer format); [messageKey] is a library message key. */
     data class Unreadable(val messageKey: String) : CalendarLoadError
@@ -21,13 +22,16 @@ sealed interface CalendarLoadError {
     data class Unknown(val message: String) : CalendarLoadError
 }
 
+private val REDIRECT_CODES = 300..399
+
 fun Throwable.toCalendarLoadError(): CalendarLoadError = when (this) {
     is CalendarNotFoundException -> CalendarLoadError.NotFound
     is CloudException -> when (val cloud = error) {
         CloudError.Unauthorized, CloudError.Forbidden -> CalendarLoadError.Unauthorized
         is CloudError.Network -> CalendarLoadError.NoNetwork
         is CloudError.Unreadable -> CalendarLoadError.Unreadable(unreadableKey(cloud.kind))
-        is CloudError.ServerError -> CalendarLoadError.Unknown("HTTP ${cloud.httpCode}")
+        is CloudError.ServerError ->
+            if (cloud.httpCode in REDIRECT_CODES) CalendarLoadError.Redirected else CalendarLoadError.Unknown("HTTP ${cloud.httpCode}")
         is CloudError.RateLimited -> CalendarLoadError.Unknown("HTTP 429")
         CloudError.Conflict -> CalendarLoadError.Unknown("Conflict")
     }
@@ -46,6 +50,7 @@ fun CalendarLoadError.toDisplayMessage(): String = when (this) {
     CalendarLoadError.NoNetwork -> stringResource(R.string.error_no_network)
     CalendarLoadError.Unauthorized -> stringResource(R.string.error_unauthorized)
     CalendarLoadError.NotFound -> stringResource(R.string.error_not_found)
+    CalendarLoadError.Redirected -> stringResource(R.string.error_redirected)
     is CalendarLoadError.Unreadable -> Messages.text(LocalContext.current, messageKey)
     is CalendarLoadError.Unknown -> stringResource(R.string.error_unknown, message)
 }

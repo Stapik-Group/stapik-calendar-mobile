@@ -8,6 +8,7 @@
     <string name="error_unknown">Something went wrong: %1$s</string>
     <string name="retry">Retry</string>
     <string name="error_not_found">Calendar not found on the server. Check your connection settings.</string>
+    <string name="error_redirected">The server redirected the request. Enter the final address of the API in the connection settings.</string>
     <string name="cached_data_banner">Showing cached data from %1$s</string>
     <string name="menu_notifications">Notifications</string>
     <string name="notifications_toggle_label">Remind me about upcoming entries</string>

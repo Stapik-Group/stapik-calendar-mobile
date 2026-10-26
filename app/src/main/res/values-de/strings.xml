@@ -9,6 +9,7 @@
     <string name="error_unknown">Etwas ist schiefgelaufen: %1$s</string>
     <string name="retry">Erneut versuchen</string>
     <string name="error_not_found">Kalender wurde auf dem Server nicht gefunden. Überprüfe die Verbindungseinstellungen.</string>
+    <string name="error_redirected">Der Server hat die Anfrage weitergeleitet. Gib in den Verbindungseinstellungen die endgültige Adresse der API an.</string>
     <string name="cached_data_banner">Zeige zwischengespeicherte Daten vom %1$s</string>
     <string name="menu_notifications">Benachrichtigungen</string>
     <string name="notifications_toggle_label">Erinnere mich an bevorstehende Einträge</string>

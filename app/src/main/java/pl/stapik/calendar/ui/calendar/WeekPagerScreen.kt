@@ -16,7 +16,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.stapikgroup.stapikcalendar.ui.calendar.WeekNavBar
 import java.time.LocalDate
 import kotlinx.coroutines.launch
 import pl.stapik.calendar.data.model.CalendarEntry

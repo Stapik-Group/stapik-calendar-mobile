@@ -1,4 +1,4 @@
-package com.stapikgroup.stapikcalendar.ui.calendar
+package pl.stapik.calendar.ui.calendar
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

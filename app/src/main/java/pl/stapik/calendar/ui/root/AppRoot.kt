@@ -24,11 +24,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.launch
 import pl.stapik.calendar.R
 import pl.stapik.calendar.data.config.ApiConfigStorage
 import pl.stapik.calendar.data.notifications.NotificationPreferencesStorage
-import pl.stapik.calendar.data.repository.CalendarRepository
 import pl.stapik.calendar.data.theme.ThemeStorage
 import pl.stapik.calendar.notifications.NotificationScheduler
 import pl.stapik.calendar.ui.calendar.WeekPagerScreen
@@ -60,7 +60,7 @@ fun AppRoot(
     apiConfigStorage: ApiConfigStorage,
     themeStorage: ThemeStorage,
     notificationPreferencesStorage: NotificationPreferencesStorage,
-    repository: CalendarRepository,
+    calendarViewModelFactory: ViewModelProvider.Factory,
     newConnectController: (CloudConfig?) -> ConnectController,
     modifier: Modifier = Modifier
 ) {
@@ -107,7 +107,7 @@ fun AppRoot(
             Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
                 when (screen) {
                     AppScreen.Calendar -> WeekPagerScreen(
-                        repository = repository,
+                        viewModelFactory = calendarViewModelFactory,
                         connectionProblem = connectionProblem,
                         onNavigateToConnect = { screen = AppScreen.Settings }
                     )
@@ -123,11 +123,7 @@ fun AppRoot(
                             connectController = connectController,
                             connected = savedConfig != null,
                             onConnected = { scope.launch { savedConfig = apiConfigStorage.load() } },
-                            onDisconnected = {
-                                savedConfig = null
-                                // The connection is already cleared; this also resets the cached sync state.
-                                scope.launch { repository.disconnect() }
-                            },
+                            onDisconnected = { savedConfig = null },
                             onClose = { screen = AppScreen.Calendar },
                             modifier = Modifier.fillMaxSize(),
                             extra = {

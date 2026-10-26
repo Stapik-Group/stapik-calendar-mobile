@@ -1,6 +1,7 @@
 package pl.stapik.calendar.di
 
 import android.content.Context
+import androidx.lifecycle.ViewModelProvider
 import java.io.File
 import java.time.Clock
 import pl.stapik.calendar.data.cache.CalendarCacheMigration
@@ -13,6 +14,7 @@ import pl.stapik.calendar.data.document.MigratingDocumentStore
 import pl.stapik.calendar.data.model.CalendarDocument
 import pl.stapik.calendar.data.model.CalendarPayload
 import pl.stapik.calendar.data.repository.CalendarRepository
+import pl.stapik.calendar.ui.calendar.CalendarViewModelFactory
 import pl.stapik.common.cloud.CloudConfig
 import pl.stapik.common.cloud.HttpCloudGateway
 import pl.stapik.common.cloud.OkHttpTransport
@@ -55,12 +57,16 @@ class AppContainer(context: Context) {
         )
     }
 
+    val calendarViewModelFactory: ViewModelProvider.Factory by lazy {
+        CalendarViewModelFactory(calendarEngine, calendarAccess) { configStorage.load() != null }
+    }
+
     /** Builds the controller of the connect form, prefilled with the saved connection. */
     fun newConnectController(initial: CloudConfig?): ConnectController =
         ConnectController(
             store = connectionStorage.store,
             gatewayFactory = { config -> HttpCloudGateway(config, transport) },
-            documents = emptyList(),
+            documents = listOf(calendarEngine),
             initial = initial
         )
 

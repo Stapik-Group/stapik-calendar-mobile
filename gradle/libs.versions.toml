@@ -50,6 +50,7 @@ core-settings = { module = "pl.stapik.common:core-settings" }
 core-sync = { module = "pl.stapik.common:core-sync" }
 core-theme = { module = "pl.stapik.common:core-theme" }
 ui-shell = { module = "pl.stapik.common:ui-shell" }
+ui-sync = { module = "pl.stapik.common:ui-sync" }
 ui-theme = { module = "pl.stapik.common:ui-theme" }
 
 [plugins]

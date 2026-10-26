@@ -9,6 +9,7 @@ import kotlinx.serialization.json.Json
 import pl.stapik.calendar.data.cache.CachedCalendar
 import pl.stapik.calendar.data.cache.CalendarCacheStorage
 import pl.stapik.calendar.data.config.ApiConfigStorage
+import pl.stapik.calendar.data.model.CalendarDocument
 import pl.stapik.calendar.data.model.CalendarEntry
 import pl.stapik.calendar.data.model.CalendarPayload
 import pl.stapik.calendar.data.model.CalendarSyncEnvelope
@@ -16,7 +17,6 @@ import pl.stapik.common.cloud.CloudConfig
 import pl.stapik.common.cloud.HttpCloudGateway
 import pl.stapik.common.cloud.HttpTransport
 import pl.stapik.common.cloud.OkHttpTransport
-import pl.stapik.common.model.SlotKey
 import pl.stapik.common.sync.CloudError
 import pl.stapik.common.sync.CloudException
 import pl.stapik.common.sync.CloudGateway
@@ -161,7 +161,7 @@ class CalendarRepository(
     }
 
     private companion object {
-        val SLOT = SlotKey("calendar.json")
+        val SLOT = CalendarDocument.slot
         const val SCOPE_READ_WRITE = "READ_WRITE"
         val lock = Mutex()
     }

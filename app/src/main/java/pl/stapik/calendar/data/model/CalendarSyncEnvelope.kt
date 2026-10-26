@@ -6,4 +6,4 @@ import kotlinx.serialization.Serializable
 data class CalendarSyncEnvelope(val lastUpdate: String, val payload: CalendarPayload)
 
 @Serializable
-data class CalendarPayload(val entries: List<CalendarEntry>, val lastUpdate: String = "")
+data class CalendarPayload(val entries: List<CalendarEntry> = emptyList(), val lastUpdate: String = "")

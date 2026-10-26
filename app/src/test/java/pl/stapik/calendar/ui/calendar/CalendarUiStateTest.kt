@@ -38,6 +38,17 @@ class CalendarUiStateTest {
     }
 
     @Test
+    fun entriesOfADayAreOrderedByTheirTime() {
+        val late = CalendarEntry("2026-01-02", "Late", time = "18:00")
+        val early = CalendarEntry("2026-01-02", "Early", time = "08:15")
+        val payload = CalendarPayload(entries = listOf(dentist, late, early))
+
+        val state = DocumentUiState.Success(payload).toCalendarUiState(canEdit = true) as CalendarUiState.Success
+
+        assertEquals(listOf(early, late, dentist), state.entriesByDay.getValue(LocalDate.parse("2026-01-02")))
+    }
+
+    @Test
     fun entriesWithAnUnreadableDateAreNotShown() {
         val payload = CalendarPayload(entries = listOf(dentist, CalendarEntry("not a date", "Broken")))
 

@@ -40,12 +40,12 @@ class CalendarEditsTest {
 
     @Test
     fun replaceKeepsTheFieldsTheEntryCarriesFromOtherApps() {
-        val withLocation = dentist.copy(unknownFields = JsonObject(mapOf("location" to JsonPrimitive("Clinic"))))
-        val stored = payload.copy(entries = listOf(withLocation, gym))
+        val withId = dentist.copy(unknownFields = JsonObject(mapOf("id" to JsonPrimitive(7))))
+        val stored = payload.copy(entries = listOf(withId, gym))
 
-        val result = edits.replace(stored, withLocation, dentist.copy(name = "Orthodontist"))
+        val result = edits.replace(stored, withId, dentist.copy(name = "Orthodontist"))
 
-        assertEquals(withLocation.copy(name = "Orthodontist"), result.entries.first())
+        assertEquals(withId.copy(name = "Orthodontist"), result.entries.first())
     }
 
     @Test
@@ -83,6 +83,21 @@ class CalendarEditsTest {
     @Test
     fun missingCountsRepeatedEntries() {
         assertEquals(listOf(dentist), edits.missing(payload, listOf(dentist, dentist)))
+    }
+
+    @Test
+    fun missingIgnoresTheIdsThatOtherAppsGive() {
+        val identified = dentist.copy(unknownFields = JsonObject(mapOf("id" to JsonPrimitive(7))))
+
+        assertEquals(emptyList<CalendarEntry>(), edits.missing(payload, listOf(identified)))
+        assertEquals(emptyList<CalendarEntry>(), edits.missing(payload.copy(entries = listOf(identified)), listOf(dentist)))
+    }
+
+    @Test
+    fun missingStillSeesOtherDifferences() {
+        val timed = dentist.copy(time = "09:30")
+
+        assertEquals(listOf(timed), edits.missing(payload, listOf(timed)))
     }
 
     @Test

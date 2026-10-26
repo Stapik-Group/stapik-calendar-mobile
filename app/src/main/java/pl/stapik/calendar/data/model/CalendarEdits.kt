@@ -2,6 +2,7 @@ package pl.stapik.calendar.data.model
 
 import java.time.Clock
 import java.time.temporal.ChronoUnit
+import kotlinx.serialization.json.JsonObject
 
 class CalendarEdits(private val clock: Clock = Clock.systemUTC()) {
     fun add(payload: CalendarPayload, entry: CalendarEntry): CalendarPayload =
@@ -21,8 +22,8 @@ class CalendarEdits(private val clock: Clock = Clock.systemUTC()) {
     }
 
     fun missing(payload: CalendarPayload, entries: List<CalendarEntry>): List<CalendarEntry> {
-        val remaining = payload.entries.toMutableList()
-        return entries.filterNot { remaining.remove(it) }
+        val remaining = payload.entries.map(::withoutId).toMutableList()
+        return entries.filterNot { remaining.remove(withoutId(it)) }
     }
 
     fun addMissing(payload: CalendarPayload, entries: List<CalendarEntry>): CalendarPayload =
@@ -31,5 +32,12 @@ class CalendarEdits(private val clock: Clock = Clock.systemUTC()) {
     private fun changed(payload: CalendarPayload, entries: List<CalendarEntry>): CalendarPayload =
         if (entries == payload.entries) payload else payload.copy(entries = entries, lastUpdate = now())
 
+    private fun withoutId(entry: CalendarEntry): CalendarEntry =
+        entry.copy(unknownFields = JsonObject(entry.unknownFields.filterKeys { it != ID_FIELD }))
+
     private fun now(): String = clock.instant().truncatedTo(ChronoUnit.SECONDS).toString()
+
+    private companion object {
+        const val ID_FIELD = "id"
+    }
 }

@@ -34,6 +34,7 @@ import pl.stapik.calendar.MainActivity
 import pl.stapik.calendar.R
 import pl.stapik.calendar.appContainer
 import pl.stapik.calendar.data.model.CalendarEntry
+import pl.stapik.calendar.data.model.inDayOrder
 import pl.stapik.calendar.data.theme.DataStoreThemeStorage
 import pl.stapik.calendar.ui.theme.entryColorFor
 import pl.stapik.common.theme.ThemeId
@@ -59,6 +60,7 @@ class CalendarWidget : GlanceAppWidget() {
         val entriesByDate = entries
             .mapNotNull { entry -> runCatching { LocalDate.parse(entry.date) }.getOrNull()?.let { it to entry } }
             .groupBy({ it.first }, { it.second })
+            .mapValues { (_, entries) -> entries.inDayOrder() }
 
         val todayLabel = context.getString(R.string.widget_today)
         val tomorrowLabel = context.getString(R.string.widget_tomorrow)
@@ -222,16 +224,31 @@ private fun CalendarEntryRow(
             modifier = modifier,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = entry.name,
-                style = TextStyle(
-                    color = ColorProvider(
-                        day = entryColor.content,
-                        night = entryColor.content
-                    ),
-                    fontSize = 13.sp
+            Column {
+                Text(
+                    text = if (entry.time.isEmpty()) entry.name else "${entry.time}  ${entry.name}",
+                    style = TextStyle(
+                        color = ColorProvider(
+                            day = entryColor.content,
+                            night = entryColor.content
+                        ),
+                        fontSize = 13.sp
+                    )
                 )
-            )
+                if (entry.location.isNotBlank()) {
+                    Text(
+                        text = entry.location,
+                        maxLines = 1,
+                        style = TextStyle(
+                            color = ColorProvider(
+                                day = entryColor.content,
+                                night = entryColor.content
+                            ),
+                            fontSize = 11.sp
+                        )
+                    )
+                }
+            }
         }
 
         Spacer(
@@ -257,4 +274,4 @@ private fun formatDate(date: LocalDate): String =
     )
 
 private fun entryId(entry: CalendarEntry): Long =
-    "${entry.date}|${entry.name}|${entry.link}|${entry.color}".hashCode().toLong()
+    "${entry.date}|${entry.time}|${entry.name}|${entry.link}|${entry.color}".hashCode().toLong()

@@ -23,6 +23,10 @@
     <string name="entry_dialog_edit_title">Eintrag bearbeiten</string>
     <string name="entry_name_label">Name</string>
     <string name="entry_link_label">Link (optional)</string>
+    <string name="entry_time_label">Uhrzeit (optional)</string>
+    <string name="entry_time_placeholder">HH:MM</string>
+    <string name="entry_location_label">Ort (optional)</string>
+    <string name="entry_location_placeholder">Adresse oder Ort...</string>
     <string name="entry_open_link">Link öffnen</string>
     <string name="entry_date_label">Datum</string>
     <string name="entry_color_label">Farbe</string>

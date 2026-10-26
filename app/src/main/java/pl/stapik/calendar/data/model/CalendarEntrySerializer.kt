@@ -17,10 +17,13 @@ object CalendarEntrySerializer : KSerializer<CalendarEntry> {
     private const val NAME = "name"
     private const val LINK = "link"
     private const val COLOR = "color"
+    private const val LOCATION = "location"
+    private const val TIME = "time"
     private const val DEFAULT_LINK = ""
     private const val DEFAULT_COLOR = "default"
+    private const val DEFAULT_TEXT = ""
 
-    private val knownFields = setOf(DATE, NAME, LINK, COLOR)
+    private val knownFields = setOf(DATE, NAME, LINK, COLOR, LOCATION, TIME)
 
     override val descriptor: SerialDescriptor = buildClassSerialDescriptor("CalendarEntry")
 
@@ -32,6 +35,8 @@ object CalendarEntrySerializer : KSerializer<CalendarEntry> {
             name = fields.requiredText(NAME),
             link = fields.optionalText(LINK, DEFAULT_LINK),
             color = fields.optionalText(COLOR, DEFAULT_COLOR),
+            location = fields.optionalText(LOCATION, DEFAULT_TEXT),
+            time = fields.optionalText(TIME, DEFAULT_TEXT),
             unknownFields = JsonObject(fields.filterKeys { it !in knownFields })
         )
     }
@@ -42,7 +47,9 @@ object CalendarEntrySerializer : KSerializer<CalendarEntry> {
             DATE to JsonPrimitive(value.date),
             NAME to JsonPrimitive(value.name),
             LINK to JsonPrimitive(value.link),
-            COLOR to JsonPrimitive(value.color)
+            COLOR to JsonPrimitive(value.color),
+            LOCATION to JsonPrimitive(value.location),
+            TIME to JsonPrimitive(value.time)
         )
         json.encodeJsonElement(JsonObject(known + value.unknownFields.filterKeys { it !in knownFields }))
     }

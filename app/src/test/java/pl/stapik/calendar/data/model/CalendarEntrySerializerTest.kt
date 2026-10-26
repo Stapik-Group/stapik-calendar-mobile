@@ -35,33 +35,59 @@ class CalendarEntrySerializerTest {
     }
 
     @Test
-    fun keepsTheFieldsOfOtherApps() {
-        val entry = decode("""{"date":"2026-01-02","name":"Dentist","location":"Clinic","time":"09:30","id":7}""")
+    fun readsTheLocationAndTheTime() {
+        val entry = decode("""{"date":"2026-01-02","name":"Dentist","location":"Clinic","time":"09:30"}""")
 
+        assertEquals("Clinic", entry.location)
+        assertEquals("09:30", entry.time)
+        assertEquals(JsonObject(emptyMap()), entry.unknownFields)
+    }
+
+    @Test
+    fun missingOrNullLocationAndTimeAreEmpty() {
+        assertEquals(CalendarEntry("2026-01-02", "Dentist"), decode("""{"date":"2026-01-02","name":"Dentist"}"""))
         assertEquals(
-            JsonObject(mapOf("location" to JsonPrimitive("Clinic"), "time" to JsonPrimitive("09:30"), "id" to JsonPrimitive(7))),
-            entry.unknownFields
+            CalendarEntry("2026-01-02", "Dentist"),
+            decode("""{"date":"2026-01-02","name":"Dentist","location":null,"time":null}""")
         )
     }
 
     @Test
+    fun alwaysWritesTheLocationAndTheTime() {
+        val written = json.encodeToJsonElement(CalendarEntrySerializer, CalendarEntry("2026-01-02", "Dentist")).jsonObject
+
+        assertEquals("", written.getValue("location").jsonPrimitive.content)
+        assertEquals("", written.getValue("time").jsonPrimitive.content)
+    }
+
+    @Test
+    fun keepsTheFieldsOfOtherApps() {
+        val entry = decode("""{"date":"2026-01-02","name":"Dentist","id":7,"reminder":true}""")
+
+        assertEquals(JsonObject(mapOf("id" to JsonPrimitive(7), "reminder" to JsonPrimitive(true))), entry.unknownFields)
+    }
+
+    @Test
     fun writesTheFieldsOfOtherApps() {
-        val entry = decode("""{"date":"2026-01-02","name":"Dentist","location":"Clinic","id":7}""")
+        val entry = decode("""{"date":"2026-01-02","name":"Dentist","location":"Clinic","time":"09:30","id":7}""")
 
         val written = json.encodeToJsonElement(CalendarEntrySerializer, entry).jsonObject
 
         assertEquals("Clinic", written.getValue("location").jsonPrimitive.content)
+        assertEquals("09:30", written.getValue("time").jsonPrimitive.content)
         assertEquals("7", written.getValue("id").jsonPrimitive.content)
         assertEquals("Dentist", written.getValue("name").jsonPrimitive.content)
     }
 
     @Test
     fun anEntryCannotHideItsKnownFieldsInTheOtherOnes() {
-        val entry = CalendarEntry("2026-01-02", "Dentist", unknownFields = JsonObject(mapOf("name" to JsonPrimitive("Other"))))
+        val hidden = JsonObject(mapOf("name" to JsonPrimitive("Other"), "time" to JsonPrimitive("23:59")))
+        val entry = CalendarEntry("2026-01-02", "Dentist", time = "09:30", unknownFields = hidden)
 
         val written = json.encodeToJsonElement(CalendarEntrySerializer, entry).jsonObject
 
         assertEquals("Dentist", written.getValue("name").jsonPrimitive.content)
+        assertEquals("09:30", written.getValue("time").jsonPrimitive.content)
     }
 
     @Test

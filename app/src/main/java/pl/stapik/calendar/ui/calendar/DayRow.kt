@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import pl.stapik.calendar.R
@@ -108,7 +109,28 @@ fun DayRow(
                             }
                             .padding(horizontal = 12.dp, vertical = 10.dp)
                     ) {
-                        Text(text = entry.name, color = entryColor.content, fontWeight = FontWeight.Medium)
+                        Column {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                if (entry.time.isNotEmpty()) {
+                                    Text(
+                                        text = entry.time,
+                                        color = entryColor.content,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.padding(end = 8.dp)
+                                    )
+                                }
+                                Text(text = entry.name, color = entryColor.content, fontWeight = FontWeight.Medium)
+                            }
+                            if (entry.location.isNotBlank()) {
+                                Text(
+                                    text = entry.location,
+                                    color = entryColor.content,
+                                    fontSize = 12.sp,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        }
                     }
                 }
             }

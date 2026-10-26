@@ -9,5 +9,7 @@ data class CalendarEntry(
     val name: String,
     val link: String = "",
     val color: String = "default",
+    val location: String = "",
+    val time: String = "",
     val unknownFields: JsonObject = JsonObject(emptyMap())
 )

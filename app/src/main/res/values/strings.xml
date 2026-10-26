@@ -21,6 +21,10 @@
     <string name="entry_dialog_edit_title">Edit entry</string>
     <string name="entry_name_label">Name</string>
     <string name="entry_link_label">Link (optional)</string>
+    <string name="entry_time_label">Time (optional)</string>
+    <string name="entry_time_placeholder">HH:MM</string>
+    <string name="entry_location_label">Location (optional)</string>
+    <string name="entry_location_placeholder">Address or place...</string>
     <string name="entry_open_link">Open link</string>
     <string name="entry_date_label">Date</string>
     <string name="entry_color_label">Color</string>

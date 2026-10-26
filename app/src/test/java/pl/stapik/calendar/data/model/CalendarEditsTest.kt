@@ -72,4 +72,31 @@ class CalendarEditsTest {
     fun removeOfAnUnknownEntryChangesNothing() {
         assertSame(payload, edits.remove(payload, CalendarEntry("2026-05-05", "Ghost")))
     }
+
+    @Test
+    fun missingListsOnlyTheEntriesTheCalendarLacks() {
+        val party = CalendarEntry("2026-01-04", "Party")
+
+        assertEquals(listOf(party), edits.missing(payload, listOf(dentist, party)))
+    }
+
+    @Test
+    fun missingCountsRepeatedEntries() {
+        assertEquals(listOf(dentist), edits.missing(payload, listOf(dentist, dentist)))
+    }
+
+    @Test
+    fun addMissingAppendsOnlyTheMissingEntriesAndStampsThePayload() {
+        val party = CalendarEntry("2026-01-04", "Party")
+
+        val result = edits.addMissing(payload, listOf(gym, party))
+
+        assertEquals(listOf(dentist, gym, party), result.entries)
+        assertEquals(stamp, result.lastUpdate)
+    }
+
+    @Test
+    fun addMissingChangesNothingWhenThereIsNothingToAdd() {
+        assertSame(payload, edits.addMissing(payload, listOf(gym, dentist)))
+    }
 }

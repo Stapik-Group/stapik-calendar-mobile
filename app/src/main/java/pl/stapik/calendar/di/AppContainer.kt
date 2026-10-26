@@ -10,6 +10,7 @@ import pl.stapik.calendar.data.cloud.CalendarAccess
 import pl.stapik.calendar.data.cloud.CloudGatewayProvider
 import pl.stapik.calendar.data.config.ApiConfigStorage
 import pl.stapik.calendar.data.config.ConnectionApiConfigStorage
+import pl.stapik.calendar.data.document.ConflictCopies
 import pl.stapik.calendar.data.document.MigratingDocumentStore
 import pl.stapik.calendar.data.model.CalendarDocument
 import pl.stapik.calendar.data.model.CalendarPayload
@@ -38,18 +39,21 @@ class AppContainer(context: Context) {
 
     val calendarAccess = CalendarAccess { gatewayProvider.current() }
 
+    private val fileStore: FileDocumentStore by lazy {
+        FileDocumentStore(
+            directory = File(appContext.filesDir, DOCUMENTS_DIRECTORY).toPath(),
+            slot = CalendarDocument.slot,
+            cipher = KeystoreCiphers.create(DOCUMENT_KEY_ALIAS, CalendarDocument.slot.value.toByteArray())
+        )
+    }
+
+    val conflictCopies: ConflictCopies by lazy { ConflictCopies(fileStore::listConflictCopies) }
+
     val calendarEngine: SyncEngine<CalendarPayload> by lazy {
         SyncEngine(
             slot = CalendarDocument.slot,
             codec = CalendarDocument.codec,
-            store = MigratingDocumentStore(
-                delegate = FileDocumentStore(
-                    directory = File(appContext.filesDir, DOCUMENTS_DIRECTORY).toPath(),
-                    slot = CalendarDocument.slot,
-                    cipher = KeystoreCiphers.create(DOCUMENT_KEY_ALIAS, CalendarDocument.slot.value.toByteArray())
-                ),
-                migration = CalendarCacheMigration(legacyCache)
-            ),
+            store = MigratingDocumentStore(delegate = fileStore, migration = CalendarCacheMigration(legacyCache)),
             cloudProvider = { gatewayProvider.current() },
             clock = Clock.systemUTC()
         )

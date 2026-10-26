@@ -20,6 +20,14 @@ class CalendarEdits(private val clock: Clock = Clock.systemUTC()) {
         return changed(payload, payload.entries.toMutableList().also { it.removeAt(index) })
     }
 
+    fun missing(payload: CalendarPayload, entries: List<CalendarEntry>): List<CalendarEntry> {
+        val remaining = payload.entries.toMutableList()
+        return entries.filterNot { remaining.remove(it) }
+    }
+
+    fun addMissing(payload: CalendarPayload, entries: List<CalendarEntry>): CalendarPayload =
+        changed(payload, payload.entries + missing(payload, entries))
+
     private fun changed(payload: CalendarPayload, entries: List<CalendarEntry>): CalendarPayload =
         if (entries == payload.entries) payload else payload.copy(entries = entries, lastUpdate = now())
 

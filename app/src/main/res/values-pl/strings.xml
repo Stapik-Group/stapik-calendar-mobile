@@ -9,6 +9,7 @@
     <string name="error_unknown">Coś poszło nie tak: %1$s</string>
     <string name="retry">Spróbuj ponownie</string>
     <string name="error_not_found">Nie znaleziono kalendarza na serwerze. Sprawdź ustawienia połączenia.</string>
+    <string name="error_redirected">Serwer przekierował żądanie. Wpisz w ustawieniach połączenia docelowy adres API.</string>
     <string name="cached_data_banner">Wyświetlam dane z cache z %1$s</string>
     <string name="menu_notifications">Powiadomienia</string>
     <string name="notifications_toggle_label">Przypominaj o nadchodzących wpisach</string>

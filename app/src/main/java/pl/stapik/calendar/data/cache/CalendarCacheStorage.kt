@@ -5,6 +5,7 @@ import pl.stapik.calendar.data.model.CalendarEntry
 interface CalendarCacheStorage {
     suspend fun load(): CachedCalendar?
     suspend fun save(calendar: CachedCalendar)
+    suspend fun clear()
 }
 
 data class CachedCalendar(

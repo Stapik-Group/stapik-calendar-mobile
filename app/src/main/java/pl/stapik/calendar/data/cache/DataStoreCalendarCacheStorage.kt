@@ -25,7 +25,6 @@ class DataStoreCalendarCacheStorage(private val context: Context) : CalendarCach
 
     override suspend fun load(): CachedCalendar? {
         val raw = context.calendarCacheDataStore.data.first()[KEY_PAYLOAD] ?: return null
-        // A corrupted or pre-migration payload should not crash the app, just act as no cache.
         return runCatching { json.decodeFromString<CachedCalendarPayload>(raw) }
             .getOrNull()
             ?.let {
@@ -50,6 +49,10 @@ class DataStoreCalendarCacheStorage(private val context: Context) : CalendarCach
             )
         )
         context.calendarCacheDataStore.edit { it[KEY_PAYLOAD] = payload }
+    }
+
+    override suspend fun clear() {
+        context.calendarCacheDataStore.edit { it.remove(KEY_PAYLOAD) }
     }
 
     private companion object {

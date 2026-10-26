@@ -24,14 +24,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.launch
 import pl.stapik.calendar.R
 import pl.stapik.calendar.data.config.ApiConfigStorage
 import pl.stapik.calendar.data.notifications.NotificationPreferencesStorage
-import pl.stapik.calendar.data.repository.CalendarRepository
 import pl.stapik.calendar.data.theme.ThemeStorage
 import pl.stapik.calendar.notifications.NotificationScheduler
 import pl.stapik.calendar.ui.calendar.WeekPagerScreen
+import pl.stapik.calendar.ui.conflicts.ConflictCopiesScreen
 import pl.stapik.calendar.ui.navigation.AppScreen
 import pl.stapik.calendar.ui.notifications.NotificationsScreen
 import pl.stapik.calendar.util.AppInfo
@@ -60,7 +61,8 @@ fun AppRoot(
     apiConfigStorage: ApiConfigStorage,
     themeStorage: ThemeStorage,
     notificationPreferencesStorage: NotificationPreferencesStorage,
-    repository: CalendarRepository,
+    calendarViewModelFactory: ViewModelProvider.Factory,
+    conflictCopiesViewModelFactory: ViewModelProvider.Factory,
     newConnectController: (CloudConfig?) -> ConnectController,
     modifier: Modifier = Modifier
 ) {
@@ -83,7 +85,7 @@ fun AppRoot(
     }
 
     StapikTheme(currentTheme) {
-        BackHandler(enabled = screen == AppScreen.Notifications) {
+        BackHandler(enabled = screen == AppScreen.Notifications || screen == AppScreen.ConflictCopies) {
             screen = AppScreen.Settings
         }
         Scaffold(
@@ -107,7 +109,7 @@ fun AppRoot(
             Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
                 when (screen) {
                     AppScreen.Calendar -> WeekPagerScreen(
-                        repository = repository,
+                        viewModelFactory = calendarViewModelFactory,
                         connectionProblem = connectionProblem,
                         onNavigateToConnect = { screen = AppScreen.Settings }
                     )
@@ -123,11 +125,7 @@ fun AppRoot(
                             connectController = connectController,
                             connected = savedConfig != null,
                             onConnected = { scope.launch { savedConfig = apiConfigStorage.load() } },
-                            onDisconnected = {
-                                savedConfig = null
-                                // The connection is already cleared; this also resets the cached sync state.
-                                scope.launch { repository.disconnect() }
-                            },
+                            onDisconnected = { savedConfig = null },
                             onClose = { screen = AppScreen.Calendar },
                             modifier = Modifier.fillMaxSize(),
                             extra = {
@@ -136,12 +134,22 @@ fun AppRoot(
                                     onClick = { screen = AppScreen.Notifications },
                                     modifier = Modifier.fillMaxWidth()
                                 )
+                                StapikButton(
+                                    text = stringResource(R.string.menu_conflict_copies),
+                                    onClick = { screen = AppScreen.ConflictCopies },
+                                    modifier = Modifier.fillMaxWidth()
+                                )
                             }
                         )
                     }
 
                     AppScreen.Notifications -> NotificationsScreen(
                         storage = notificationPreferencesStorage,
+                        onBack = { screen = AppScreen.Settings }
+                    )
+
+                    AppScreen.ConflictCopies -> ConflictCopiesScreen(
+                        viewModelFactory = conflictCopiesViewModelFactory,
                         onBack = { screen = AppScreen.Settings }
                     )
                 }

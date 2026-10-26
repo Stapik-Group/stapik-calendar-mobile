@@ -10,12 +10,12 @@ import androidx.glance.appwidget.updateAll
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import java.time.LocalDate
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
 import pl.stapik.calendar.R
 import pl.stapik.calendar.appContainer
 import pl.stapik.calendar.data.notifications.DataStoreNotificationPreferencesStorage
 import pl.stapik.calendar.data.notifications.DataStoreNotifiedEntriesStorage
-import pl.stapik.calendar.data.repository.CalendarFetchOutcome
 import pl.stapik.calendar.ui.widget.CalendarWidget
 
 class EntryReminderWorker(
@@ -27,14 +27,15 @@ class EntryReminderWorker(
         val preferencesStorage = DataStoreNotificationPreferencesStorage(applicationContext)
         if (!preferencesStorage.enabled.first()) return Result.success()
 
-        val repository = applicationContext.appContainer.calendarRepository
+        val engine = applicationContext.appContainer.calendarEngine
+        runCatching { engine.sync() }
 
-        val entries = when (val outcome = repository.fetchEntries()) {
-            is CalendarFetchOutcome.Fresh -> outcome.result.entries
-            is CalendarFetchOutcome.Cached -> outcome.cached.entries
-            is CalendarFetchOutcome.LocalOnly -> outcome.cached.entries
-            is CalendarFetchOutcome.Conflict -> outcome.local.entries
-            is CalendarFetchOutcome.Failure -> return Result.retry()
+        val entries = try {
+            engine.load().entries
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            return Result.failure()
         }
 
         CalendarWidget().updateAll(applicationContext)

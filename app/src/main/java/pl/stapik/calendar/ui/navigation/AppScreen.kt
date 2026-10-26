@@ -4,4 +4,5 @@ sealed interface AppScreen {
     data object Calendar: AppScreen
     data object Settings: AppScreen
     data object Notifications: AppScreen
+    data object ConflictCopies: AppScreen
 }

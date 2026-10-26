@@ -3,6 +3,8 @@ package pl.stapik.calendar.data.model
 import java.time.Clock
 import java.time.Instant
 import java.time.ZoneOffset
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertSame
 import org.junit.Test
@@ -34,6 +36,16 @@ class CalendarEditsTest {
 
         assertEquals(listOf(moved, gym), result.entries)
         assertEquals(stamp, result.lastUpdate)
+    }
+
+    @Test
+    fun replaceKeepsTheFieldsTheEntryCarriesFromOtherApps() {
+        val withLocation = dentist.copy(unknownFields = JsonObject(mapOf("location" to JsonPrimitive("Clinic"))))
+        val stored = payload.copy(entries = listOf(withLocation, gym))
+
+        val result = edits.replace(stored, withLocation, dentist.copy(name = "Orthodontist"))
+
+        assertEquals(withLocation.copy(name = "Orthodontist"), result.entries.first())
     }
 
     @Test

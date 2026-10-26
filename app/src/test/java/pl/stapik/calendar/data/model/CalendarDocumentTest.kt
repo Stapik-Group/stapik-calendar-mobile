@@ -33,6 +33,29 @@ class CalendarDocumentTest {
     }
 
     @Test
+    fun encodingKeepsTheFieldsOfEntriesThatThePhoneDoesNotKnow() {
+        val previous = DocumentEnvelope.parse(
+            """
+            {
+              "lastUpdate": "2026-01-01T10:00:00Z",
+              "payload": {
+                "lastUpdate": "2026-01-01T10:00:00Z",
+                "entries": [{"date": "2026-01-02", "name": "Dentist", "link": "", "color": "red", "location": "Clinic", "time": "09:30", "id": 7}]
+              }
+            }
+            """.trimIndent()
+        )
+        val decoded = codec.decode(previous)
+
+        val result = Json.parseToJsonElement(codec.encode(decoded, previous, "2026-02-01T00:00:00Z").toJson()).jsonObject
+        val entry = result.getValue("payload").jsonObject.getValue("entries").jsonArray.single().jsonObject
+
+        assertEquals("Clinic", entry.getValue("location").jsonPrimitive.content)
+        assertEquals("09:30", entry.getValue("time").jsonPrimitive.content)
+        assertEquals(7, entry.getValue("id").jsonPrimitive.int)
+    }
+
+    @Test
     fun emptyEnvelopeDecodesToEmptyCalendar() {
         val payload = codec.decode(DocumentEnvelope.empty(""))
 

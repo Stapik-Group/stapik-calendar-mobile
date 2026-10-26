@@ -10,7 +10,8 @@ class CalendarEdits(private val clock: Clock = Clock.systemUTC()) {
     fun replace(payload: CalendarPayload, old: CalendarEntry, new: CalendarEntry): CalendarPayload {
         val index = payload.entries.indexOf(old)
         if (index < 0) return payload
-        return changed(payload, payload.entries.toMutableList().also { it[index] = new })
+        val kept = new.copy(unknownFields = old.unknownFields)
+        return changed(payload, payload.entries.toMutableList().also { it[index] = kept })
     }
 
     fun remove(payload: CalendarPayload, entry: CalendarEntry): CalendarPayload {

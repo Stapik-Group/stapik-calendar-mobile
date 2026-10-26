@@ -16,6 +16,7 @@ import pl.stapik.calendar.data.model.CalendarDocument
 import pl.stapik.calendar.data.model.CalendarPayload
 import pl.stapik.calendar.data.sync.CalendarSyncWorker
 import pl.stapik.calendar.ui.calendar.CalendarViewModelFactory
+import pl.stapik.calendar.ui.conflicts.ConflictCopiesViewModelFactory
 import pl.stapik.common.cloud.CloudConfig
 import pl.stapik.common.cloud.HttpCloudGateway
 import pl.stapik.common.cloud.OkHttpTransport
@@ -66,6 +67,10 @@ class AppContainer(context: Context) {
             retry = WorkManagerSyncRetry(appContext, CalendarSyncWorker::class.java),
             connected = { configStorage.load() != null }
         )
+    }
+
+    val conflictCopiesViewModelFactory: ViewModelProvider.Factory by lazy {
+        ConflictCopiesViewModelFactory(calendarEngine, conflictCopies)
     }
 
     /** Builds the controller of the connect form, prefilled with the saved connection. */

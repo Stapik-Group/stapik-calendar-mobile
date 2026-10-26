@@ -29,4 +29,11 @@
     <string name="button_cancel">Anuluj</string>
     <string name="button_delete">Usuń</string>
     <string name="button_ok">OK</string>
+    <string name="menu_conflict_copies">Zapisane wersje</string>
+    <string name="conflict_copies_hint">Gdy zmiany na dwóch urządzeniach się zderzą, przegrana wersja jest zapisywana tutaj. Możesz dodać jej wpisy z powrotem do kalendarza.</string>
+    <string name="conflict_copies_empty">Brak zapisanych wersji.</string>
+    <string name="conflict_copy_source_local">Wersja z tego urządzenia</string>
+    <string name="conflict_copy_source_cloud">Wersja z chmury</string>
+    <string name="conflict_copy_summary">Wpisy: %1$d, brakujące w kalendarzu: %2$d</string>
+    <string name="conflict_copy_add_missing">Dodaj brakujące wpisy</string>
 </resources>

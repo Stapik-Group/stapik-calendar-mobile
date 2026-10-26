@@ -28,4 +28,11 @@
     <string name="button_cancel">Cancel</string>
     <string name="button_delete">Delete</string>
     <string name="button_ok">OK</string>
+    <string name="menu_conflict_copies">Saved versions</string>
+    <string name="conflict_copies_hint">When changes on two devices collide, the losing version is saved here. You can add its entries back to the calendar.</string>
+    <string name="conflict_copies_empty">No saved versions.</string>
+    <string name="conflict_copy_source_local">Version from this device</string>
+    <string name="conflict_copy_source_cloud">Version from the cloud</string>
+    <string name="conflict_copy_summary">Entries: %1$d, missing from the calendar: %2$d</string>
+    <string name="conflict_copy_add_missing">Add missing entries</string>
 </resources>

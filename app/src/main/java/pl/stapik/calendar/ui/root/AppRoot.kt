@@ -32,6 +32,7 @@ import pl.stapik.calendar.data.notifications.NotificationPreferencesStorage
 import pl.stapik.calendar.data.theme.ThemeStorage
 import pl.stapik.calendar.notifications.NotificationScheduler
 import pl.stapik.calendar.ui.calendar.WeekPagerScreen
+import pl.stapik.calendar.ui.conflicts.ConflictCopiesScreen
 import pl.stapik.calendar.ui.navigation.AppScreen
 import pl.stapik.calendar.ui.notifications.NotificationsScreen
 import pl.stapik.calendar.util.AppInfo
@@ -61,6 +62,7 @@ fun AppRoot(
     themeStorage: ThemeStorage,
     notificationPreferencesStorage: NotificationPreferencesStorage,
     calendarViewModelFactory: ViewModelProvider.Factory,
+    conflictCopiesViewModelFactory: ViewModelProvider.Factory,
     newConnectController: (CloudConfig?) -> ConnectController,
     modifier: Modifier = Modifier
 ) {
@@ -83,7 +85,7 @@ fun AppRoot(
     }
 
     StapikTheme(currentTheme) {
-        BackHandler(enabled = screen == AppScreen.Notifications) {
+        BackHandler(enabled = screen == AppScreen.Notifications || screen == AppScreen.ConflictCopies) {
             screen = AppScreen.Settings
         }
         Scaffold(
@@ -132,12 +134,22 @@ fun AppRoot(
                                     onClick = { screen = AppScreen.Notifications },
                                     modifier = Modifier.fillMaxWidth()
                                 )
+                                StapikButton(
+                                    text = stringResource(R.string.menu_conflict_copies),
+                                    onClick = { screen = AppScreen.ConflictCopies },
+                                    modifier = Modifier.fillMaxWidth()
+                                )
                             }
                         )
                     }
 
                     AppScreen.Notifications -> NotificationsScreen(
                         storage = notificationPreferencesStorage,
+                        onBack = { screen = AppScreen.Settings }
+                    )
+
+                    AppScreen.ConflictCopies -> ConflictCopiesScreen(
+                        viewModelFactory = conflictCopiesViewModelFactory,
                         onBack = { screen = AppScreen.Settings }
                     )
                 }

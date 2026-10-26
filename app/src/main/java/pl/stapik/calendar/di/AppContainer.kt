@@ -5,6 +5,7 @@ import java.io.File
 import java.time.Clock
 import pl.stapik.calendar.data.cache.CalendarCacheMigration
 import pl.stapik.calendar.data.cache.DataStoreCalendarCacheStorage
+import pl.stapik.calendar.data.cloud.CalendarAccess
 import pl.stapik.calendar.data.cloud.CloudGatewayProvider
 import pl.stapik.calendar.data.config.ApiConfigStorage
 import pl.stapik.calendar.data.config.ConnectionApiConfigStorage
@@ -34,6 +35,8 @@ class AppContainer(context: Context) {
     val calendarRepository = CalendarRepository(configStorage, legacyCache, transport)
 
     private val gatewayProvider = CloudGatewayProvider(configStorage, transport)
+
+    val calendarAccess = CalendarAccess { gatewayProvider.current() }
 
     val calendarEngine: SyncEngine<CalendarPayload> by lazy {
         SyncEngine(

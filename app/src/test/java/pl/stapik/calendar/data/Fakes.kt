@@ -13,6 +13,10 @@ internal class FakeCalendarCache(var calendar: CachedCalendar? = null) : Calenda
     override suspend fun save(calendar: CachedCalendar) {
         this.calendar = calendar
     }
+
+    override suspend fun clear() {
+        calendar = null
+    }
 }
 
 internal class FakeDocumentStore(

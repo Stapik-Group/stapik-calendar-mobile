@@ -13,7 +13,6 @@ import pl.stapik.calendar.data.config.ConnectionApiConfigStorage
 import pl.stapik.calendar.data.document.MigratingDocumentStore
 import pl.stapik.calendar.data.model.CalendarDocument
 import pl.stapik.calendar.data.model.CalendarPayload
-import pl.stapik.calendar.data.repository.CalendarRepository
 import pl.stapik.calendar.ui.calendar.CalendarViewModelFactory
 import pl.stapik.common.cloud.CloudConfig
 import pl.stapik.common.cloud.HttpCloudGateway
@@ -32,9 +31,6 @@ class AppContainer(context: Context) {
 
     /** The one connection storage of the process: the Activity, the widget and the reminders share it. */
     val configStorage: ApiConfigStorage = connectionStorage
-
-    /** The one repository of the process: the screen, the widget and the reminders sync through it. */
-    val calendarRepository = CalendarRepository(configStorage, legacyCache, transport)
 
     private val gatewayProvider = CloudGatewayProvider(configStorage, transport)
 

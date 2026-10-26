@@ -19,7 +19,17 @@ class CalendarCacheMigration(
         if (holdsDocument(store)) return false
         val cached = legacy.load() ?: return false
         store.save(toLocalDocument(cached))
+        forgetLegacy()
         return true
+    }
+
+    private suspend fun forgetLegacy() {
+        try {
+            legacy.clear()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+        }
     }
 
     private suspend fun holdsDocument(store: DocumentStore): Boolean =

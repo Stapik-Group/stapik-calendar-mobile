@@ -6,6 +6,7 @@ import java.time.ZoneOffset
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -77,6 +78,15 @@ class CalendarCacheMigrationTest {
     }
 
     @Test
+    fun forgetsTheLegacyCacheOnceItIsImported() = runBlocking {
+        val cache = FakeCalendarCache(CachedCalendar(entries = listOf(entry), updatedAt = "2026-01-01T10:00:00Z"))
+
+        migration(cache).migrateInto(FakeDocumentStore())
+
+        assertNull(cache.calendar)
+    }
+
+    @Test
     fun doesNothingWithoutALegacyCache() = runBlocking {
         val store = FakeDocumentStore()
 
@@ -102,5 +112,6 @@ class CalendarCacheMigrationTest {
 
         assertFalse(migration(cache).migrateInto(store))
         assertEquals(0, store.saves)
+        assertNotNull(cache.calendar)
     }
 }

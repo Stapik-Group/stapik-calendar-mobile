@@ -4,13 +4,6 @@
     <string name="loading">Laden</string>
     <string name="no_entries">—</string>
     <string name="settings">Einstellungen</string>
-    <string name="error_no_network">Keine Netzwerkverbindung.</string>
-    <string name="error_unauthorized">Ungültige Server-URL oder API-Schlüssel.</string>
-    <string name="error_unknown">Etwas ist schiefgelaufen: %1$s</string>
-    <string name="retry">Erneut versuchen</string>
-    <string name="error_not_found">Kalender wurde auf dem Server nicht gefunden. Überprüfe die Verbindungseinstellungen.</string>
-    <string name="error_redirected">Der Server hat die Anfrage weitergeleitet. Gib in den Verbindungseinstellungen die endgültige Adresse der API an.</string>
-    <string name="cached_data_banner">Zeige zwischengespeicherte Daten vom %1$s</string>
     <string name="menu_notifications">Benachrichtigungen</string>
     <string name="notifications_toggle_label">Erinnere mich an bevorstehende Einträge</string>
     <string name="notification_channel_name">Eintrags-Erinnerungen</string>
@@ -26,7 +19,6 @@
     <string name="connection_problem_newer_version">Die gespeicherte Verbindung stammt von einer neueren Version der App. Aktualisiere die App, um sie zu verwenden.</string>
     <string name="connection_problem_unreadable">Die gespeicherte Verbindung kann nicht gelesen werden. Tippe, um dich erneut zu verbinden.</string>
     <string name="connection_problem_reset">Die gespeicherte Verbindung ist nicht mehr gültig. Tippe, um dich erneut zu verbinden.</string>
-    <string name="pending_changes_banner">Offline: Lokale Änderungen werden an den Server gesendet, sobald er erreichbar ist.</string>
     <string name="entry_dialog_add_title">Neuer Eintrag</string>
     <string name="entry_dialog_edit_title">Eintrag bearbeiten</string>
     <string name="entry_name_label">Name</string>
@@ -38,9 +30,4 @@
     <string name="button_cancel">Abbrechen</string>
     <string name="button_delete">Löschen</string>
     <string name="button_ok">OK</string>
-    <string name="conflict_title">Lokale Änderungen gefunden</string>
-    <string name="conflict_message">Dieses Gerät hat Änderungen, die nicht auf dem Server sind.\n\nLokal: %1$d Einträge\nServer: %2$d Einträge (letzte Änderung: %3$s)\n\nWelche Version möchtest du behalten?</string>
-    <string name="conflict_read_only_hint">Dieser Schlüssel ist schreibgeschützt, daher können lokale Änderungen nicht gesendet werden. Du kannst nur die Serverversion laden.</string>
-    <string name="conflict_keep_local">Lokale behalten und an Server senden</string>
-    <string name="conflict_use_server">Serverversion verwenden (lokale Änderungen verwerfen)</string>
 </resources>

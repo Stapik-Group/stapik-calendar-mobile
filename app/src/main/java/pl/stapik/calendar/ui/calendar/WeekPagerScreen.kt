@@ -166,17 +166,6 @@ private fun ConnectionProblem.messageRes(): Int = when (this) {
     ConnectionProblem.RESET -> R.string.connection_problem_reset
 }
 
-internal fun formatCachedTimestamp(updatedAt: String?): String {
-    if (updatedAt == null) return ""
-    return runCatching {
-        val instant = java.time.Instant.parse(updatedAt)
-        java.time.format.DateTimeFormatter
-            .ofLocalizedDateTime(java.time.format.FormatStyle.SHORT)
-            .withZone(java.time.ZoneId.systemDefault())
-            .format(instant)
-    }.getOrDefault(updatedAt)
-}
-
 @Composable
 private fun CenteredMessage(text: String, modifier: Modifier = Modifier) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

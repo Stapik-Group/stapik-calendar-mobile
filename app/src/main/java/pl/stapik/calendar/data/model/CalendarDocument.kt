@@ -7,4 +7,6 @@ object CalendarDocument {
     val slot = SlotKey("calendar.json")
 
     val codec = DocumentCodec(CalendarPayload.serializer()) { payload -> payload.entries.isEmpty() }
+
+    fun slotOf(year: Int): SlotKey = slot.inPartition(CalendarYears.partitionOf(year))
 }

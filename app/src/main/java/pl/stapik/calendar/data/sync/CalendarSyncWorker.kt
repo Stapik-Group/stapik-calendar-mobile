@@ -7,5 +7,5 @@ import pl.stapik.common.sync.SyncOutcome
 import pl.stapik.common.work.SyncWorker
 
 class CalendarSyncWorker(context: Context, params: WorkerParameters) : SyncWorker(context, params) {
-    override suspend fun runSync(): SyncOutcome = applicationContext.appContainer.calendarEngine.sync()
+    override suspend fun runSync(): SyncOutcome = applicationContext.appContainer.calendarBook.sync()
 }

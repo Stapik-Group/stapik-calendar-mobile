@@ -79,7 +79,7 @@ class CalendarWidget : GlanceAppWidget() {
 
 private suspend fun readEntries(context: Context): List<CalendarEntry> =
     try {
-        context.appContainer.calendarEngine.load().entries
+        context.appContainer.calendarBook.load().entries
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {

@@ -27,11 +27,11 @@ class EntryReminderWorker(
         val preferencesStorage = DataStoreNotificationPreferencesStorage(applicationContext)
         if (!preferencesStorage.enabled.first()) return Result.success()
 
-        val engine = applicationContext.appContainer.calendarEngine
-        runCatching { engine.sync() }
+        val book = applicationContext.appContainer.calendarBook
+        runCatching { book.sync() }
 
         val entries = try {
-            engine.load().entries
+            book.load().entries
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {

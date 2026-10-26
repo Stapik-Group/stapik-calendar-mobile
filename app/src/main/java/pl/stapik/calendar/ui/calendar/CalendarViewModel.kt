@@ -22,6 +22,7 @@ import pl.stapik.common.presentation.SyncUiState
 import pl.stapik.common.sync.FirstConnectionChoice
 import pl.stapik.common.sync.SyncEngine
 import pl.stapik.common.sync.SyncOutcome
+import pl.stapik.common.sync.SyncRetry
 
 data class FirstConnectionPrompt(val canKeepLocal: Boolean)
 
@@ -29,9 +30,10 @@ class CalendarViewModel(
     engine: SyncEngine<CalendarPayload>,
     private val access: CalendarAccess,
     connected: suspend () -> Boolean,
+    retry: SyncRetry,
     private val edits: CalendarEdits = CalendarEdits()
 ) : ViewModel() {
-    private val controller = DocumentController(engine, viewModelScope, connected = connected)
+    private val controller = DocumentController(engine, viewModelScope, retry = retry, connected = connected)
     private val writable = MutableStateFlow(true)
     private val prompt = MutableStateFlow<FirstConnectionPrompt?>(null)
     private var canKeepLocal = true
@@ -105,8 +107,9 @@ class CalendarViewModel(
 class CalendarViewModelFactory(
     private val engine: SyncEngine<CalendarPayload>,
     private val access: CalendarAccess,
+    private val retry: SyncRetry,
     private val connected: suspend () -> Boolean
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T = CalendarViewModel(engine, access, connected) as T
+    override fun <T : ViewModel> create(modelClass: Class<T>): T = CalendarViewModel(engine, access, connected, retry) as T
 }

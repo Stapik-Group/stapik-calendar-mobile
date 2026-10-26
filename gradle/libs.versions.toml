@@ -48,6 +48,7 @@ core-model = { module = "pl.stapik.common:core-model" }
 core-presentation = { module = "pl.stapik.common:core-presentation" }
 core-settings = { module = "pl.stapik.common:core-settings" }
 core-sync = { module = "pl.stapik.common:core-sync" }
+core-work = { module = "pl.stapik.common:core-work" }
 core-theme = { module = "pl.stapik.common:core-theme" }
 ui-shell = { module = "pl.stapik.common:ui-shell" }
 ui-sync = { module = "pl.stapik.common:ui-sync" }

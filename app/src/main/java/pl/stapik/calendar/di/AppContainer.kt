@@ -13,6 +13,7 @@ import pl.stapik.calendar.data.config.ConnectionApiConfigStorage
 import pl.stapik.calendar.data.document.MigratingDocumentStore
 import pl.stapik.calendar.data.model.CalendarDocument
 import pl.stapik.calendar.data.model.CalendarPayload
+import pl.stapik.calendar.data.sync.CalendarSyncWorker
 import pl.stapik.calendar.ui.calendar.CalendarViewModelFactory
 import pl.stapik.common.cloud.CloudConfig
 import pl.stapik.common.cloud.HttpCloudGateway
@@ -21,6 +22,7 @@ import pl.stapik.common.crypto.KeystoreCiphers
 import pl.stapik.common.document.FileDocumentStore
 import pl.stapik.common.presentation.ConnectController
 import pl.stapik.common.sync.SyncEngine
+import pl.stapik.common.work.WorkManagerSyncRetry
 
 class AppContainer(context: Context) {
     private val appContext = context.applicationContext
@@ -54,7 +56,12 @@ class AppContainer(context: Context) {
     }
 
     val calendarViewModelFactory: ViewModelProvider.Factory by lazy {
-        CalendarViewModelFactory(calendarEngine, calendarAccess) { configStorage.load() != null }
+        CalendarViewModelFactory(
+            engine = calendarEngine,
+            access = calendarAccess,
+            retry = WorkManagerSyncRetry(appContext, CalendarSyncWorker::class.java),
+            connected = { configStorage.load() != null }
+        )
     }
 
     /** Builds the controller of the connect form, prefilled with the saved connection. */

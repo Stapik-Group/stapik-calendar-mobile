@@ -14,7 +14,7 @@ class WidgetRefreshWorker(
 
     override suspend fun doWork(): Result {
         runCatching {
-            applicationContext.appContainer.calendarRepository.fetchEntries()
+            applicationContext.appContainer.calendarBook.sync()
         }
         CalendarWidget().updateAll(applicationContext)
 

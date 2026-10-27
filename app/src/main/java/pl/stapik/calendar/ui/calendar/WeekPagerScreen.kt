@@ -11,42 +11,63 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.stapikgroup.stapikcalendar.ui.calendar.WeekNavBar
 import java.time.LocalDate
 import kotlinx.coroutines.launch
-import pl.stapik.calendar.data.model.CalendarEntry
-import pl.stapik.calendar.data.repository.CalendarRepository
 import pl.stapik.calendar.R
-import pl.stapik.common.ui.components.themedSurface
+import pl.stapik.calendar.data.config.ConnectionProblem
+import pl.stapik.calendar.data.model.CalendarEntry
+import pl.stapik.calendar.util.AppInfo
+import pl.stapik.common.presentation.SyncAction
+import pl.stapik.common.presentation.SyncBadge
+import pl.stapik.common.ui.sync.FirstConnectionDialog
+import pl.stapik.common.ui.sync.LoadErrorMessage
+import pl.stapik.common.ui.sync.SyncStatusBanner
 import pl.stapik.common.ui.theme.StapikTheme
 
 @Composable
 fun WeekPagerScreen(
-    repository: CalendarRepository,
+    viewModelFactory: ViewModelProvider.Factory,
+    connectionProblem: ConnectionProblem?,
     onNavigateToConnect: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val viewModel: CalendarViewModel = viewModel(
-        factory = remember(repository) { CalendarViewModelFactory(repository) }
-    )
+    val viewModel: CalendarViewModel = viewModel(factory = viewModelFactory)
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val sync by viewModel.sync.collectAsStateWithLifecycle()
+    val firstConnectionPrompt by viewModel.firstConnectionPrompt.collectAsStateWithLifecycle()
     val pagerState = rememberPagerState(initialPage = WeekPaging.INITIAL_PAGE) { WeekPaging.PAGE_COUNT }
     val coroutineScope = rememberCoroutineScope()
-    val today = remember { LocalDate.now() }
+    val uriHandler = LocalUriHandler.current
+    val today by rememberToday()
+    val weekPaging = remember { WeekPaging(today) }
+    var shownToday by remember { mutableStateOf(today) }
     val scheme = MaterialTheme.colorScheme
-    val colors = StapikTheme.colors
-    val conflict by viewModel.conflict.collectAsStateWithLifecycle()
     var editor by remember { mutableStateOf<EntryEditorTarget?>(null) }
 
     LaunchedEffect(Unit) { viewModel.refresh() }
 
-    conflict?.let {
-        ConflictDialog(conflict = it, onKeepLocal = viewModel::keepLocal, onUseServer = viewModel::useServer)
+    LaunchedEffect(today) {
+        val onCurrentWeek = pagerState.currentPage == weekPaging.weekStartToPage(shownToday)
+        if (onCurrentWeek) pagerState.scrollToPage(weekPaging.weekStartToPage(today))
+        shownToday = today
+    }
+
+    LifecycleEventEffect(Lifecycle.Event.ON_STOP) { viewModel.flushPendingSync() }
+
+    firstConnectionPrompt?.let {
+        FirstConnectionDialog(
+            canKeepLocal = it.canKeepLocal,
+            onChoose = viewModel::chooseSource,
+            onCancel = viewModel::postponeChoice
+        )
     }
 
     editor?.let { target ->
@@ -68,7 +89,7 @@ fun WeekPagerScreen(
     }
 
     Column(modifier = modifier.fillMaxSize().background(scheme.background)) {
-        val currentWeekStart = WeekPaging.pageToWeekStart(pagerState.currentPage)
+        val currentWeekStart = weekPaging.pageToWeekStart(pagerState.currentPage)
 
         WeekNavBar(
             weekStart = currentWeekStart,
@@ -80,47 +101,40 @@ fun WeekPagerScreen(
             }
         )
 
-        val isRefreshing = (state as? CalendarUiState.Success)?.isRefreshing ?: false
-
         PullToRefreshBox(
-            isRefreshing = isRefreshing,
+            isRefreshing = sync.badge == SyncBadge.SYNCING,
             onRefresh = viewModel::refresh,
             modifier = Modifier.weight(1f)
         ) {
             when (val current = state) {
                 is CalendarUiState.Loading -> CenteredMessage(stringResource(R.string.loading))
 
-                is CalendarUiState.Error -> {
-                    CenteredMessageWithAction(
-                        message = current.error.toDisplayMessage(),
-                        actionLabel = stringResource(R.string.retry),
-                        onAction = viewModel::refresh
-                    )
-                }
+                is CalendarUiState.Error -> LoadErrorMessage(
+                    kind = current.kind,
+                    onDiscardLocal = viewModel::discardLocalAndResync
+                )
 
                 is CalendarUiState.Success -> {
                     Column(modifier = Modifier.fillMaxSize()) {
-                        val bannerText = when {
-                            current.isLocalMode -> stringResource(R.string.local_mode_banner)
-                            current.isStale && current.hasPendingChanges -> stringResource(R.string.pending_changes_banner)
-                            current.isStale -> stringResource(R.string.cached_data_banner, formatCachedTimestamp(current.updatedAt))
-                            else -> null
-                        }
-                        if (bannerText != null) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(colors.button)
-                                    .let { if (current.isLocalMode) it.clickable(onClick = onNavigateToConnect) else it }
-                                    .padding(8.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(bannerText, color = scheme.onBackground)
-                            }
+                        if (sync.badge == SyncBadge.LOCAL_ONLY) {
+                            LocalModeBanner(connectionProblem = connectionProblem, onClick = onNavigateToConnect)
+                        } else {
+                            SyncStatusBanner(
+                                state = sync,
+                                onAction = { action ->
+                                    when (action) {
+                                        SyncAction.RETRY -> viewModel.refresh()
+                                        SyncAction.CHOOSE_SOURCE -> viewModel.askForSource()
+                                        SyncAction.DISMISS -> viewModel.dismissNotice()
+                                        SyncAction.RECONNECT, SyncAction.ENTER_PASSPHRASE -> onNavigateToConnect()
+                                        SyncAction.UPDATE_APP -> uriHandler.openUri(AppInfo.RELEASES_URL)
+                                    }
+                                }
+                            )
                         }
                         HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
                             WeekPage(
-                                weekStart = WeekPaging.pageToWeekStart(page),
+                                weekStart = weekPaging.pageToWeekStart(page),
                                 entriesByDay = current.entriesByDay,
                                 today = today,
                                 canEdit = current.canEdit,
@@ -137,46 +151,33 @@ fun WeekPagerScreen(
     }
 }
 
-internal fun formatCachedTimestamp(updatedAt: String?): String {
-    if (updatedAt == null) return ""
-    return runCatching {
-        val instant = java.time.Instant.parse(updatedAt)
-        java.time.format.DateTimeFormatter
-            .ofLocalizedDateTime(java.time.format.FormatStyle.SHORT)
-            .withZone(java.time.ZoneId.systemDefault())
-            .format(instant)
-    }.getOrDefault(updatedAt)
+@Composable
+private fun LocalModeBanner(connectionProblem: ConnectionProblem?, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(StapikTheme.colors.button)
+            .let { if (connectionProblem != ConnectionProblem.NEWER_VERSION) it.clickable(onClick = onClick) else it }
+            .padding(8.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = stringResource(connectionProblem?.messageRes() ?: R.string.local_mode_banner),
+            color = MaterialTheme.colorScheme.onBackground
+        )
+    }
+}
+
+private fun ConnectionProblem.messageRes(): Int = when (this) {
+    ConnectionProblem.NEWER_VERSION -> R.string.connection_problem_newer_version
+    ConnectionProblem.UNREADABLE -> R.string.connection_problem_unreadable
+    ConnectionProblem.RESET -> R.string.connection_problem_reset
 }
 
 @Composable
 private fun CenteredMessage(text: String, modifier: Modifier = Modifier) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text(text, color = MaterialTheme.colorScheme.onBackground)
-    }
-}
-
-@Composable
-private fun CenteredMessageWithAction(
-    message: String,
-    actionLabel: String,
-    onAction: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val scheme = MaterialTheme.colorScheme
-    val colors = StapikTheme.colors
-    Box(modifier = modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(message, color = scheme.onBackground)
-            Spacer(modifier = Modifier.height(12.dp))
-            Box(
-                modifier = Modifier
-                    .themedSurface(colors, colors.button, raised = true)
-                    .clickable(onClick = onAction)
-                    .padding(horizontal = 20.dp, vertical = 10.dp)
-            ) {
-                Text(actionLabel, color = scheme.onBackground, fontWeight = FontWeight.Bold)
-            }
-        }
     }
 }
 

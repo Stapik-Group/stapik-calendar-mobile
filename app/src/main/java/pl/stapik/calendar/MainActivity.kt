@@ -42,7 +42,8 @@ class MainActivity : ComponentActivity() {
                 apiConfigStorage = container.configStorage,
                 themeStorage = themeStorage,
                 notificationPreferencesStorage = notificationPreferencesStorage,
-                repository = container.calendarRepository,
+                calendarViewModelFactory = container.calendarViewModelFactory,
+                conflictCopiesViewModelFactory = container.conflictCopiesViewModelFactory,
                 newConnectController = container::newConnectController
             )
         }

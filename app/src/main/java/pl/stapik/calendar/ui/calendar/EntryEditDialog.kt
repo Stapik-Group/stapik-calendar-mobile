@@ -41,6 +41,8 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import pl.stapik.calendar.R
 import pl.stapik.calendar.data.model.CalendarEntry
+import pl.stapik.calendar.data.model.EntryIds
+import pl.stapik.calendar.data.model.EntryTime
 import pl.stapik.calendar.ui.theme.EntryColorKeys
 import pl.stapik.calendar.ui.theme.entryColorFor
 
@@ -58,11 +60,15 @@ fun EntryEditDialog(
     val dateFormatter = remember(locale) {
         DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale)
     }
+    val entryId = remember { initial?.id ?: EntryIds.generate() }
     var name by remember { mutableStateOf(initial?.name.orEmpty()) }
     var link by remember { mutableStateOf(initial?.link.orEmpty()) }
     var color by remember { mutableStateOf(initial?.color ?: "default") }
+    var time by remember { mutableStateOf(initial?.time.orEmpty()) }
+    var location by remember { mutableStateOf(initial?.location.orEmpty()) }
     var date by remember { mutableStateOf(initialDate) }
     var showDatePicker by remember { mutableStateOf(false) }
+    val normalizedTime = EntryTime.normalize(time)
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -96,6 +102,25 @@ fun EntryEditDialog(
                     }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = time,
+                    onValueChange = { time = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    isError = normalizedTime == null,
+                    label = { Text(stringResource(R.string.entry_time_label)) },
+                    placeholder = { Text(stringResource(R.string.entry_time_placeholder)) }
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = location,
+                    onValueChange = { location = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    label = { Text(stringResource(R.string.entry_location_label)) },
+                    placeholder = { Text(stringResource(R.string.entry_location_placeholder)) }
+                )
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(stringResource(R.string.entry_date_label), fontWeight = FontWeight.Bold)
                 Text(
                     text = dateFormatter.format(date),
@@ -127,14 +152,17 @@ fun EntryEditDialog(
         },
         confirmButton = {
             TextButton(
-                enabled = name.isNotBlank(),
+                enabled = name.isNotBlank() && normalizedTime != null,
                 onClick = {
                     onSave(
                         CalendarEntry(
+                            id = entryId,
                             date = date.toString(),
                             name = name.trim(),
                             link = link.trim(),
-                            color = color
+                            color = color,
+                            location = location.trim(),
+                            time = normalizedTime.orEmpty()
                         )
                     )
                 }

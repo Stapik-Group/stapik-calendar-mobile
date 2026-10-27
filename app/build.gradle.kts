@@ -14,10 +14,8 @@ android {
         applicationId = "pl.stapik.calendar"
         minSdk = 26
         targetSdk = 36
-        versionCode = 2
-        versionName = "1.3.0"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        versionCode = 3
+        versionName = "1.4.0"
 
         androidResources {
             localeFilters += listOf("en", "pl", "de")
@@ -40,7 +38,7 @@ android {
     buildTypes {
         release {
             optimization {
-                enable = false
+                enable = true
             }
             if (keystoreFile != null) {
                 signingConfig = signingConfigs.getByName("release")
@@ -79,20 +77,19 @@ dependencies {
     implementation(libs.androidx.glance.appwidget)
     implementation(libs.core.cloud)
     implementation(libs.core.crypto)
+    implementation(libs.core.document)
     implementation(libs.core.i18n)
     implementation(libs.core.model)
     implementation(libs.core.presentation)
     implementation(libs.core.settings)
     implementation(libs.core.sync)
     implementation(libs.core.theme)
+    implementation(libs.core.work)
     implementation(libs.ui.shell)
+    implementation(libs.ui.sync)
     implementation(libs.ui.theme)
 
     testImplementation(libs.junit)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(libs.androidx.junit)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }

@@ -14,6 +14,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
 import pl.stapik.calendar.R
 import pl.stapik.calendar.appContainer
+import pl.stapik.calendar.data.model.CalendarEntry
 import pl.stapik.calendar.data.notifications.DataStoreNotificationPreferencesStorage
 import pl.stapik.calendar.data.notifications.DataStoreNotifiedEntriesStorage
 import pl.stapik.calendar.ui.widget.CalendarWidget
@@ -40,44 +41,34 @@ class EntryReminderWorker(
 
         CalendarWidget().updateAll(applicationContext)
 
-        val today = LocalDate.now()
-        val tomorrow = today.plusDays(1)
         val notifiedStorage = DataStoreNotifiedEntriesStorage(applicationContext)
-        val alreadyNotified = notifiedStorage.load()
-        val notifiedNow = mutableSetOf<String>()
+        val plan = ReminderPlanner.plan(entries, LocalDate.now(), notifiedStorage.load())
 
-        entries.forEach { entry ->
-            val entryDate = runCatching { LocalDate.parse(entry.date) }.getOrNull() ?: return@forEach
-            val isToday = entryDate == today
-            if (!isToday && entryDate != tomorrow) return@forEach
-
-            val key = "${if (isToday) "today" else "tomorrow"}|${entry.date}|${entry.name}"
-            if (key !in alreadyNotified) {
-                notify(entry.name, isToday = isToday)
-            }
-            notifiedNow += key
-        }
-
-        notifiedStorage.save(notifiedNow)
+        plan.toNotify.forEach { notify(it.entry, it.day) }
+        notifiedStorage.save(plan.notifiedKeys)
 
         return Result.success()
     }
 
-    private fun notify(entryName: String, isToday: Boolean) {
+    private fun notify(entry: CalendarEntry, day: ReminderDay) {
         if (ActivityCompat.checkSelfPermission(applicationContext, Manifest.permission.POST_NOTIFICATIONS)
             != PackageManager.PERMISSION_GRANTED
         ) {
             return
         }
         val title = applicationContext.getString(
-            if (isToday) R.string.notification_title_today else R.string.notification_title_tomorrow
+            if (day == ReminderDay.TODAY) R.string.notification_title_today else R.string.notification_title_tomorrow
         )
         val notification = NotificationCompat.Builder(applicationContext, NotificationChannels.ENTRY_REMINDERS_CHANNEL_ID)
             .setSmallIcon(R.mipmap.ic_launcher_foreground)
             .setContentTitle(title)
-            .setContentText(entryName)
+            .setContentText(entry.name)
             .setAutoCancel(true)
             .build()
-        NotificationManagerCompat.from(applicationContext).notify(entryName.hashCode(), notification)
+        NotificationManagerCompat.from(applicationContext).notify(entry.id, REMINDER_NOTIFICATION_ID, notification)
+    }
+
+    private companion object {
+        const val REMINDER_NOTIFICATION_ID = 0
     }
 }

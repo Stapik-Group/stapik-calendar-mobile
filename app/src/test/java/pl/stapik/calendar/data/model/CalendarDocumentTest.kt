@@ -117,8 +117,15 @@ class CalendarDocumentTest {
     }
 
     @Test
+    fun theGateReadsAVersionWrittenAsText() {
+        val text = DocumentEnvelope.parse("""{"lastUpdate":"","payload":{"schemaVersion":"2"}}""")
+
+        assertEquals(2, CalendarDocument.schemaGate.newerVersionOf(text))
+    }
+
+    @Test
     fun theGateIgnoresAVersionThatIsNotANumber() {
-        val odd = DocumentEnvelope.parse("""{"lastUpdate":"","payload":{"schemaVersion":"2"}}""")
+        val odd = DocumentEnvelope.parse("""{"lastUpdate":"","payload":{"schemaVersion":"abc"}}""")
 
         assertNull(CalendarDocument.schemaGate.newerVersionOf(odd))
     }

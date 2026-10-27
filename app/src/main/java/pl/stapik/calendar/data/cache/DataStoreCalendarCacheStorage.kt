@@ -5,57 +5,33 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.first
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
-import pl.stapik.calendar.data.model.CalendarEntry
 
 private val Context.calendarCacheDataStore by preferencesDataStore(name = "calendar_cache")
 
-@Serializable
-private data class CachedCalendarPayload(
-    val entries: List<CalendarEntry>,
-    val updatedAt: String,
-    val dirty: Boolean = false,
-    val scope: String? = null,
-    val modifiedAt: String? = null
-)
-
 class DataStoreCalendarCacheStorage(private val context: Context) : CalendarCacheStorage {
-    private val json = Json { ignoreUnknownKeys = true }
-
     override suspend fun load(): CachedCalendar? {
         val raw = context.calendarCacheDataStore.data.first()[KEY_PAYLOAD] ?: return null
-        return runCatching { json.decodeFromString<CachedCalendarPayload>(raw) }
-            .getOrNull()
-            ?.let {
-                CachedCalendar(
-                    entries = it.entries,
-                    updatedAt = it.updatedAt,
-                    dirty = it.dirty,
-                    scope = it.scope,
-                    modifiedAt = it.modifiedAt
-                )
-            }
+        return when (val reading = LegacyCacheCodec.read(raw)) {
+            is LegacyCacheReading.Intact -> reading.calendar
+            is LegacyCacheReading.Salvaged -> reading.calendar.also { keepUnreadable(raw) }
+            LegacyCacheReading.Unreadable -> null.also { keepUnreadable(raw) }
+        }
     }
 
     override suspend fun save(calendar: CachedCalendar) {
-        val payload = json.encodeToString(
-            CachedCalendarPayload(
-                entries = calendar.entries,
-                updatedAt = calendar.updatedAt,
-                dirty = calendar.dirty,
-                scope = calendar.scope,
-                modifiedAt = calendar.modifiedAt
-            )
-        )
-        context.calendarCacheDataStore.edit { it[KEY_PAYLOAD] = payload }
+        context.calendarCacheDataStore.edit { it[KEY_PAYLOAD] = LegacyCacheCodec.encode(calendar) }
     }
 
     override suspend fun clear() {
         context.calendarCacheDataStore.edit { it.remove(KEY_PAYLOAD) }
     }
 
+    private suspend fun keepUnreadable(raw: String) {
+        context.calendarCacheDataStore.edit { if (it[KEY_UNREADABLE] == null) it[KEY_UNREADABLE] = raw }
+    }
+
     private companion object {
         val KEY_PAYLOAD = stringPreferencesKey("cached_calendar")
+        val KEY_UNREADABLE = stringPreferencesKey("cached_calendar_unreadable")
     }
 }

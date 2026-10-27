@@ -79,7 +79,8 @@ class AppContainer(context: Context) {
                     codec = CalendarDocument.codec,
                     store = yearStore(year),
                     cloudProvider = { gatewayProvider.current() },
-                    clock = clock
+                    clock = clock,
+                    schemaGate = CalendarDocument.schemaGate
                 )
             },
             files = yearFiles,

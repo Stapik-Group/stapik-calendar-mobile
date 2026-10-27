@@ -6,6 +6,7 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import pl.stapik.common.model.DocumentEnvelope
@@ -76,5 +77,49 @@ class CalendarDocumentTest {
         val payload = result.getValue("payload").jsonObject
         assertTrue("payloadExtra" in payload)
         assertEquals(2, payload.getValue("entries").jsonArray.size)
+    }
+
+    @Test
+    fun encodingWritesTheCurrentSchemaVersionIntoThePayload() {
+        val result = Json.parseToJsonElement(
+            codec.encode(CalendarPayload(), DocumentEnvelope.empty(""), "2026-02-01T00:00:00Z").toJson()
+        ).jsonObject
+
+        assertEquals(CalendarDocument.SCHEMA_VERSION, result.getValue("payload").jsonObject.getValue("schemaVersion").jsonPrimitive.int)
+    }
+
+    @Test
+    fun encodingKeepsTheSchemaVersionOfADocumentThatIsNewer() {
+        val newer = DocumentEnvelope.parse("""{"lastUpdate":"","payload":{"schemaVersion":5,"entries":[]}}""")
+
+        val result = Json.parseToJsonElement(codec.encode(codec.decode(newer), newer, "2026-02-01T00:00:00Z").toJson()).jsonObject
+
+        assertEquals(5, result.getValue("payload").jsonObject.getValue("schemaVersion").jsonPrimitive.int)
+    }
+
+    @Test
+    fun theGateKnowsADocumentWithoutAVersionAsNotNewer() {
+        assertNull(CalendarDocument.schemaGate.newerVersionOf(DocumentEnvelope.parse(stored)))
+    }
+
+    @Test
+    fun theGateSeesADocumentOfANewerVersion() {
+        val newer = DocumentEnvelope.parse("""{"lastUpdate":"","payload":{"schemaVersion":2}}""")
+
+        assertEquals(2, CalendarDocument.schemaGate.newerVersionOf(newer))
+    }
+
+    @Test
+    fun theGateAcceptsTheCurrentVersion() {
+        val current = DocumentEnvelope.parse("""{"lastUpdate":"","payload":{"schemaVersion":${CalendarDocument.SCHEMA_VERSION}}}""")
+
+        assertNull(CalendarDocument.schemaGate.newerVersionOf(current))
+    }
+
+    @Test
+    fun theGateIgnoresAVersionThatIsNotANumber() {
+        val odd = DocumentEnvelope.parse("""{"lastUpdate":"","payload":{"schemaVersion":"2"}}""")
+
+        assertNull(CalendarDocument.schemaGate.newerVersionOf(odd))
     }
 }

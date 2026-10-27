@@ -47,7 +47,7 @@ class CalendarBookTest {
     private val book by lazy {
         CalendarBook(
             engineOf = { year ->
-                SyncEngine(CalendarDocument.slotOf(year), CalendarDocument.codec, store(year), { cloud }, clock)
+                SyncEngine(CalendarDocument.slotOf(year), CalendarDocument.codec, store(year), { cloud }, clock, CalendarDocument.schemaGate)
             },
             files = CalendarYearFiles(directory),
             legacySplit = LegacyCalendarSplit(legacy, ::store, clock),
@@ -70,6 +70,21 @@ class CalendarBookTest {
         cloud!!.documents[CalendarDocument.slotOf(year)]
             ?.let { CalendarDocument.codec.decode(DocumentEnvelope.parse(it.content)).entries }
             .orEmpty()
+
+    @Test
+    fun aYearWrittenWithANewerSchemaIsNotEdited() = runBlocking {
+        val newer = DocumentEnvelope.parse(
+            """{"lastUpdate":"2026-01-01T00:00:00Z","payload":{"schemaVersion":2,"lastUpdate":"2026-01-01T00:00:00Z","entries":[{"id":"dentist","date":"2026-01-02","name":"Dentist"}]}}"""
+        )
+        val newerStore = store(2026) as FakeDocumentStore
+        newerStore.document = LocalDocument(newer)
+
+        val refused = book.edit(2026) { edits.add(it, barber) }
+
+        assertTrue(refused is SyncOutcome.NewerSchema)
+        assertEquals(newer.toJson(), newerStore.document!!.content.toJson())
+        assertEquals(0, newerStore.saves)
+    }
 
     @Test
     fun entriesOfEveryYearAreLoadedTogether() = runBlocking {

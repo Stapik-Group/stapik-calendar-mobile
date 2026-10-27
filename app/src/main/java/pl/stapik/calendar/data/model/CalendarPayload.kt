@@ -5,5 +5,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class CalendarPayload(
     @Serializable(with = CalendarEntriesSerializer::class) val entries: List<CalendarEntry> = emptyList(),
-    val lastUpdate: String = ""
+    val lastUpdate: String = "",
+    val schemaVersion: Int = CalendarDocument.SCHEMA_VERSION
 )

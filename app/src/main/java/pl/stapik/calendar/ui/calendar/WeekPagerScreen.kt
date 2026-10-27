@@ -46,11 +46,19 @@ fun WeekPagerScreen(
     val pagerState = rememberPagerState(initialPage = WeekPaging.INITIAL_PAGE) { WeekPaging.PAGE_COUNT }
     val coroutineScope = rememberCoroutineScope()
     val uriHandler = LocalUriHandler.current
-    val today = remember { LocalDate.now() }
+    val today by rememberToday()
+    val weekPaging = remember { WeekPaging(today) }
+    var shownToday by remember { mutableStateOf(today) }
     val scheme = MaterialTheme.colorScheme
     var editor by remember { mutableStateOf<EntryEditorTarget?>(null) }
 
     LaunchedEffect(Unit) { viewModel.refresh() }
+
+    LaunchedEffect(today) {
+        val onCurrentWeek = pagerState.currentPage == weekPaging.weekStartToPage(shownToday)
+        if (onCurrentWeek) pagerState.scrollToPage(weekPaging.weekStartToPage(today))
+        shownToday = today
+    }
 
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { viewModel.flushPendingSync() }
 
@@ -81,7 +89,7 @@ fun WeekPagerScreen(
     }
 
     Column(modifier = modifier.fillMaxSize().background(scheme.background)) {
-        val currentWeekStart = WeekPaging.pageToWeekStart(pagerState.currentPage)
+        val currentWeekStart = weekPaging.pageToWeekStart(pagerState.currentPage)
 
         WeekNavBar(
             weekStart = currentWeekStart,
@@ -126,7 +134,7 @@ fun WeekPagerScreen(
                         }
                         HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
                             WeekPage(
-                                weekStart = WeekPaging.pageToWeekStart(page),
+                                weekStart = weekPaging.pageToWeekStart(page),
                                 entriesByDay = current.entriesByDay,
                                 today = today,
                                 canEdit = current.canEdit,

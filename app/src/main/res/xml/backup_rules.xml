@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <full-backup-content>
-    <exclude domain="file" path="stapik" />
+    <include domain="file" path="stapik-backup" />
+    <include domain="file" path="datastore/app_theme.preferences_pb" />
+    <include domain="file" path="datastore/notification_prefs.preferences_pb" />
 </full-backup-content>

@@ -38,6 +38,7 @@ class CalendarBookTest {
     private val stores = mutableMapOf<Int, DocumentStore>()
     private val legacy = FakeDocumentStore()
     private var cloud: FakeCloud? = FakeCloud()
+    private var restored: suspend () -> Unit = {}
 
     private val dentist = CalendarEntry("dentist", "2026-01-02", "Dentist")
     private val barber = CalendarEntry("barber", "2026-02-02", "Barber")
@@ -54,6 +55,7 @@ class CalendarBookTest {
             gateway = { cloud },
             pendingMerges = LineSetFile(directory.resolve("pending-merges")),
             importedClouds = LineSetFile(directory.resolve("imported-clouds")),
+            restoreBackup = { restored() },
             clock = clock
         )
     }
@@ -84,6 +86,13 @@ class CalendarBookTest {
         assertTrue(refused is SyncOutcome.NewerSchema)
         assertEquals(newer.toJson(), newerStore.document!!.content.toJson())
         assertEquals(0, newerStore.saves)
+    }
+
+    @Test
+    fun theBackupIsRestoredBeforeTheFirstLoad() = runBlocking {
+        restored = { store(2026).save(LocalDocument(envelopeOf(dentist))) }
+
+        assertEquals(listOf(dentist), entries())
     }
 
     @Test

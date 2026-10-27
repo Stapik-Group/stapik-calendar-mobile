@@ -33,6 +33,7 @@ class CalendarBook(
     private val gateway: suspend () -> CloudGateway?,
     private val pendingMerges: LineSetFile,
     private val importedClouds: LineSetFile,
+    private val restoreBackup: suspend () -> Unit = {},
     private val clock: Clock = Clock.systemUTC(),
     private val edits: CalendarEdits = CalendarEdits(clock)
 ) {
@@ -99,6 +100,7 @@ class CalendarBook(
             if (prepared) return
             val split = io { legacySplit.run() }
             if (split != null && split.wasSynchronized) io { pendingMerges.add(split.years.map(Int::toString)) }
+            io { restoreBackup() }
             prepared = true
         }
     }

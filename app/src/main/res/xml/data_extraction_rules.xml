@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <data-extraction-rules>
     <cloud-backup>
-        <exclude domain="file" path="stapik" />
+        <include domain="file" path="stapik-backup" />
+        <include domain="file" path="datastore/app_theme.preferences_pb" />
+        <include domain="file" path="datastore/notification_prefs.preferences_pb" />
     </cloud-backup>
     <device-transfer>
-        <exclude domain="file" path="stapik" />
+        <include domain="file" path="stapik-backup" />
+        <include domain="file" path="datastore/app_theme.preferences_pb" />
+        <include domain="file" path="datastore/notification_prefs.preferences_pb" />
     </device-transfer>
 </data-extraction-rules>

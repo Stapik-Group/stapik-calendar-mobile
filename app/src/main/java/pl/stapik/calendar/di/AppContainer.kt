@@ -10,6 +10,9 @@ import pl.stapik.calendar.data.cache.CalendarCacheMigration
 import pl.stapik.calendar.data.cache.DataStoreCalendarCacheStorage
 import pl.stapik.calendar.data.cloud.CalendarAccess
 import pl.stapik.calendar.data.cloud.CloudGatewayProvider
+import pl.stapik.calendar.data.backup.BackupMirror
+import pl.stapik.calendar.data.backup.BackupRestore
+import pl.stapik.calendar.data.backup.MirroredDocumentStore
 import pl.stapik.calendar.data.config.ApiConfigStorage
 import pl.stapik.calendar.data.config.ConnectionApiConfigStorage
 import pl.stapik.calendar.data.document.CalendarBook
@@ -28,6 +31,7 @@ import pl.stapik.common.cloud.OkHttpTransport
 import pl.stapik.common.crypto.KeystoreCiphers
 import pl.stapik.common.document.FileDocumentStore
 import pl.stapik.common.model.SlotKey
+import pl.stapik.common.sync.DocumentStore
 import pl.stapik.common.presentation.ConnectController
 import pl.stapik.common.sync.SyncEngine
 import pl.stapik.common.work.WorkManagerSyncRetry
@@ -48,12 +52,15 @@ class AppContainer(context: Context) {
 
     private val documentsDirectory: Path = File(appContext.filesDir, DOCUMENTS_DIRECTORY).toPath()
     private val yearFiles = CalendarYearFiles(documentsDirectory)
+    private val backupMirror = BackupMirror(File(appContext.filesDir, BACKUP_DIRECTORY).toPath())
     private val yearStores = ConcurrentHashMap<Int, FileDocumentStore>()
 
     private val wholeStore: FileDocumentStore by lazy { storeFor(CalendarDocument.slot) }
 
     private fun yearStore(year: Int): FileDocumentStore =
         yearStores.getOrPut(year) { storeFor(CalendarDocument.slotOf(year)) }
+
+    private fun mirroredYearStore(year: Int): DocumentStore = MirroredDocumentStore(yearStore(year), backupMirror, year)
 
     private fun storeFor(slot: SlotKey): FileDocumentStore =
         FileDocumentStore(
@@ -77,7 +84,7 @@ class AppContainer(context: Context) {
                 SyncEngine(
                     slot = CalendarDocument.slotOf(year),
                     codec = CalendarDocument.codec,
-                    store = yearStore(year),
+                    store = mirroredYearStore(year),
                     cloudProvider = { gatewayProvider.current() },
                     clock = clock,
                     schemaGate = CalendarDocument.schemaGate
@@ -86,12 +93,13 @@ class AppContainer(context: Context) {
             files = yearFiles,
             legacySplit = LegacyCalendarSplit(
                 legacy = MigratingDocumentStore(delegate = wholeStore, migration = CalendarCacheMigration(legacyCache)),
-                storeOf = ::yearStore,
+                storeOf = ::mirroredYearStore,
                 clock = clock
             ),
             gateway = { gatewayProvider.current() },
             pendingMerges = LineSetFile(documentsDirectory.resolve(PENDING_MERGES_FILE)),
             importedClouds = LineSetFile(documentsDirectory.resolve(IMPORTED_CLOUDS_FILE)),
+            restoreBackup = BackupRestore(backupMirror, ::mirroredYearStore)::run,
             clock = clock
         )
     }
@@ -120,6 +128,7 @@ class AppContainer(context: Context) {
 
     private companion object {
         const val DOCUMENTS_DIRECTORY = "stapik/documents"
+        const val BACKUP_DIRECTORY = "stapik-backup"
         const val DOCUMENT_KEY_ALIAS = "stapikcalendar_document_key"
         const val PENDING_MERGES_FILE = "pending-merges"
         const val IMPORTED_CLOUDS_FILE = "imported-clouds"

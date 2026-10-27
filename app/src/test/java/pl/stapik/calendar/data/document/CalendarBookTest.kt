@@ -39,10 +39,10 @@ class CalendarBookTest {
     private val legacy = FakeDocumentStore()
     private var cloud: FakeCloud? = FakeCloud()
 
-    private val dentist = CalendarEntry("2026-01-02", "Dentist")
-    private val barber = CalendarEntry("2026-02-02", "Barber")
-    private val gym = CalendarEntry("2025-12-31", "Gym")
-    private val trip = CalendarEntry("2024-07-01", "Trip")
+    private val dentist = CalendarEntry("dentist", "2026-01-02", "Dentist")
+    private val barber = CalendarEntry("barber", "2026-02-02", "Barber")
+    private val gym = CalendarEntry("gym", "2025-12-31", "Gym")
+    private val trip = CalendarEntry("trip", "2024-07-01", "Trip")
 
     private val book by lazy {
         CalendarBook(
@@ -138,7 +138,7 @@ class CalendarBookTest {
     fun theWholeDocumentIsImportedOnlyOncePerCloud() = runBlocking {
         cloud!!.put(CalendarDocument.slot, dentist)
         book.sync()
-        book.edit(2026) { edits.remove(it, dentist) }
+        book.edit(2026) { edits.remove(it, dentist.id) }
         book.sync()
 
         book.sync()
@@ -210,7 +210,7 @@ class CalendarBookTest {
         add(dentist)
         book.sync()
 
-        assertEquals(null, book.edit(2026) { edits.remove(it, barber) })
+        assertEquals(null, book.edit(2026) { edits.remove(it, barber.id) })
 
         assertFalse(book.hasPendingChanges())
     }

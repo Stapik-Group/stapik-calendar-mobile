@@ -5,6 +5,7 @@ import kotlinx.serialization.json.JsonObject
 
 @Serializable(with = CalendarEntrySerializer::class)
 data class CalendarEntry(
+    val id: String,
     val date: String,
     val name: String,
     val link: String = "",

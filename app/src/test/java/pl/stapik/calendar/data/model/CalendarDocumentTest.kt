@@ -19,7 +19,7 @@ class CalendarDocumentTest {
           "envelopeExtra": 7,
           "payload": {
             "lastUpdate": "2026-01-01T10:00:00Z",
-            "entries": [{"date": "2026-01-02", "name": "Dentist", "link": "", "color": "red"}],
+            "entries": [{"id": "dentist", "date": "2026-01-02", "name": "Dentist", "link": "", "color": "red"}],
             "payloadExtra": {"flag": true}
           }
         }
@@ -29,7 +29,7 @@ class CalendarDocumentTest {
     fun decodesTheEntriesOfThePayload() {
         val payload = codec.decode(DocumentEnvelope.parse(stored))
 
-        assertEquals(listOf(CalendarEntry("2026-01-02", "Dentist", "", "red")), payload.entries)
+        assertEquals(listOf(CalendarEntry("dentist", "2026-01-02", "Dentist", "", "red")), payload.entries)
     }
 
     @Test
@@ -40,7 +40,7 @@ class CalendarDocumentTest {
               "lastUpdate": "2026-01-01T10:00:00Z",
               "payload": {
                 "lastUpdate": "2026-01-01T10:00:00Z",
-                "entries": [{"date": "2026-01-02", "name": "Dentist", "link": "", "color": "red", "location": "Clinic", "time": "09:30", "id": 7}]
+                "entries": [{"id": "dentist", "date": "2026-01-02", "name": "Dentist", "link": "", "color": "red", "location": "Clinic", "time": "09:30", "reminder": 7}]
               }
             }
             """.trimIndent()
@@ -52,7 +52,8 @@ class CalendarDocumentTest {
 
         assertEquals("Clinic", entry.getValue("location").jsonPrimitive.content)
         assertEquals("09:30", entry.getValue("time").jsonPrimitive.content)
-        assertEquals(7, entry.getValue("id").jsonPrimitive.int)
+        assertEquals(7, entry.getValue("reminder").jsonPrimitive.int)
+        assertEquals("dentist", entry.getValue("id").jsonPrimitive.content)
     }
 
     @Test
@@ -66,7 +67,7 @@ class CalendarDocumentTest {
     @Test
     fun encodingKeepsUnknownKeysOfEnvelopeAndPayload() {
         val previous = DocumentEnvelope.parse(stored)
-        val edited = codec.decode(previous).let { it.copy(entries = it.entries + CalendarEntry("2026-01-03", "Gym")) }
+        val edited = codec.decode(previous).let { it.copy(entries = it.entries + CalendarEntry("gym", "2026-01-03", "Gym")) }
 
         val result = Json.parseToJsonElement(codec.encode(edited, previous, "2026-02-01T00:00:00Z").toJson()).jsonObject
 

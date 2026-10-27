@@ -9,9 +9,9 @@ import pl.stapik.calendar.data.model.CalendarPayload
 import pl.stapik.common.sync.ConflictSource
 
 class ConflictCopyRowsTest {
-    private val dentist = CalendarEntry("2026-01-02", "Dentist")
-    private val gym = CalendarEntry("2026-01-03", "Gym")
-    private val party = CalendarEntry("2026-01-04", "Party")
+    private val dentist = CalendarEntry("dentist", "2026-01-02", "Dentist")
+    private val gym = CalendarEntry("gym", "2026-01-03", "Gym")
+    private val party = CalendarEntry("party", "2026-01-04", "Party")
     private val createdAt = Instant.parse("2026-03-01T12:00:00Z")
 
     private fun copyOf(vararg entries: CalendarEntry) = RecoverableCopy(createdAt, ConflictSource.LOCAL, entries.toList())

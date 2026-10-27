@@ -20,7 +20,7 @@ import pl.stapik.common.model.LocalDocument
 
 class CalendarCacheMigrationTest {
     private val clock = Clock.fixed(Instant.parse("2026-03-01T12:00:00Z"), ZoneOffset.UTC)
-    private val entry = CalendarEntry("2026-01-02", "Dentist", "", "red")
+    private val entry = CalendarEntry("dentist", "2026-01-02", "Dentist", "", "red")
 
     private fun migration(cache: FakeCalendarCache) = CalendarCacheMigration(cache, clock)
 
@@ -47,6 +47,17 @@ class CalendarCacheMigrationTest {
         assertNull(document.cloudIdentity)
         assertEquals(listOf(entry), CalendarDocument.codec.decode(document.content).entries)
         assertEquals("2026-01-02T08:30:15Z", document.content.lastUpdate)
+    }
+
+    @Test
+    fun givesEntriesThatShareAnIdDistinctOnes() = runBlocking {
+        val cache = FakeCalendarCache(CachedCalendar(entries = listOf(entry, entry.copy(name = "Gym")), updatedAt = "2026-01-01T10:00:00Z"))
+        val store = FakeDocumentStore()
+
+        migration(cache).migrateInto(store)
+
+        val ids = CalendarDocument.codec.decode(store.document!!.content).entries.map { it.id }
+        assertEquals(2, ids.toSet().size)
     }
 
     @Test

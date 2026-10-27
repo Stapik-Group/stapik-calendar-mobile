@@ -6,9 +6,9 @@ import org.junit.Assert.assertThrows
 import org.junit.Test
 
 class CalendarYearsTest {
-    private val dentist = CalendarEntry("2026-01-02", "Dentist")
-    private val gym = CalendarEntry("2025-12-31", "Gym")
-    private val broken = CalendarEntry("not a date", "Broken")
+    private val dentist = CalendarEntry("dentist", "2026-01-02", "Dentist")
+    private val gym = CalendarEntry("gym", "2025-12-31", "Gym")
+    private val broken = CalendarEntry("broken", "not a date", "Broken")
 
     @Test
     fun aPartitionIsTheFourDigitYear() {
@@ -36,7 +36,7 @@ class CalendarYearsTest {
     @Test
     fun anEntryWithoutAReadableDateHasNoYear() {
         assertNull(CalendarYears.yearOf(broken))
-        assertNull(CalendarYears.yearOf(CalendarEntry("2026-02-30", "Impossible")))
+        assertNull(CalendarYears.yearOf(CalendarEntry("impossible", "2026-02-30", "Impossible")))
     }
 
     @Test

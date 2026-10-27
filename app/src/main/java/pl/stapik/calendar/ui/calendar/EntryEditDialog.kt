@@ -41,6 +41,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import pl.stapik.calendar.R
 import pl.stapik.calendar.data.model.CalendarEntry
+import pl.stapik.calendar.data.model.EntryIds
 import pl.stapik.calendar.data.model.EntryTime
 import pl.stapik.calendar.ui.theme.EntryColorKeys
 import pl.stapik.calendar.ui.theme.entryColorFor
@@ -59,6 +60,7 @@ fun EntryEditDialog(
     val dateFormatter = remember(locale) {
         DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale)
     }
+    val entryId = remember { initial?.id ?: EntryIds.generate() }
     var name by remember { mutableStateOf(initial?.name.orEmpty()) }
     var link by remember { mutableStateOf(initial?.link.orEmpty()) }
     var color by remember { mutableStateOf(initial?.color ?: "default") }
@@ -154,6 +156,7 @@ fun EntryEditDialog(
                 onClick = {
                     onSave(
                         CalendarEntry(
+                            id = entryId,
                             date = date.toString(),
                             name = name.trim(),
                             link = link.trim(),

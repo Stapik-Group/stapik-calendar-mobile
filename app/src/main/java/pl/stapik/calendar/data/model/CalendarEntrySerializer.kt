@@ -19,18 +19,20 @@ object CalendarEntrySerializer : KSerializer<CalendarEntry> {
     private const val COLOR = "color"
     private const val LOCATION = "location"
     private const val TIME = "time"
+    private const val ID = "id"
     private const val DEFAULT_LINK = ""
     private const val DEFAULT_COLOR = "default"
     private const val DEFAULT_TEXT = ""
 
-    private val knownFields = setOf(DATE, NAME, LINK, COLOR, LOCATION, TIME)
+    private val knownFields = setOf(DATE, NAME, LINK, COLOR, LOCATION, TIME, ID)
 
     override val descriptor: SerialDescriptor = buildClassSerialDescriptor("CalendarEntry")
 
     override fun deserialize(decoder: Decoder): CalendarEntry {
         val json = decoder as? JsonDecoder ?: throw SerializationException("A calendar entry can only be read from JSON")
         val fields = json.decodeJsonElement() as? JsonObject ?: throw SerializationException("A calendar entry is not an object")
-        return CalendarEntry(
+        val entry = CalendarEntry(
+            id = fields.text(ID).orEmpty(),
             date = fields.requiredText(DATE),
             name = fields.requiredText(NAME),
             link = fields.optionalText(LINK, DEFAULT_LINK),
@@ -39,6 +41,7 @@ object CalendarEntrySerializer : KSerializer<CalendarEntry> {
             time = fields.optionalText(TIME, DEFAULT_TEXT),
             unknownFields = JsonObject(fields.filterKeys { it !in knownFields })
         )
+        return if (entry.id.isBlank()) entry.copy(id = EntryIds.contentId(entry)) else entry
     }
 
     override fun serialize(encoder: Encoder, value: CalendarEntry) {
@@ -49,7 +52,8 @@ object CalendarEntrySerializer : KSerializer<CalendarEntry> {
             LINK to JsonPrimitive(value.link),
             COLOR to JsonPrimitive(value.color),
             LOCATION to JsonPrimitive(value.location),
-            TIME to JsonPrimitive(value.time)
+            TIME to JsonPrimitive(value.time),
+            ID to JsonPrimitive(value.id)
         )
         json.encodeJsonElement(JsonObject(known + value.unknownFields.filterKeys { it !in knownFields }))
     }

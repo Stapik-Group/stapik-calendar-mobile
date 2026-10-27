@@ -12,7 +12,7 @@ import pl.stapik.common.sync.ConflictCopy
 import pl.stapik.common.sync.ConflictSource
 
 class ConflictCopiesTest {
-    private val dentist = CalendarEntry("2026-01-02", "Dentist")
+    private val dentist = CalendarEntry("dentist", "2026-01-02", "Dentist")
     private val createdAt = Instant.parse("2026-03-01T12:00:00Z")
 
     private fun copy(source: ConflictSource, content: String) =

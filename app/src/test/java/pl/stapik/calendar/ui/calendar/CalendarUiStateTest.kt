@@ -11,9 +11,9 @@ import pl.stapik.common.presentation.DocumentUiState
 import pl.stapik.common.presentation.LoadErrorKind
 
 class CalendarUiStateTest {
-    private val dentist = CalendarEntry("2026-01-02", "Dentist")
-    private val gym = CalendarEntry("2026-01-02", "Gym")
-    private val party = CalendarEntry("2026-01-05", "Party")
+    private val dentist = CalendarEntry("dentist", "2026-01-02", "Dentist")
+    private val gym = CalendarEntry("gym", "2026-01-02", "Gym")
+    private val party = CalendarEntry("party", "2026-01-05", "Party")
 
     @Test
     fun aLoadingDocumentIsLoading() {
@@ -39,8 +39,8 @@ class CalendarUiStateTest {
 
     @Test
     fun entriesOfADayAreOrderedByTheirTime() {
-        val late = CalendarEntry("2026-01-02", "Late", time = "18:00")
-        val early = CalendarEntry("2026-01-02", "Early", time = "08:15")
+        val late = CalendarEntry("late", "2026-01-02", "Late", time = "18:00")
+        val early = CalendarEntry("early", "2026-01-02", "Early", time = "08:15")
         val payload = CalendarPayload(entries = listOf(dentist, late, early))
 
         val state = DocumentUiState.Success(payload).toCalendarUiState(canEdit = true) as CalendarUiState.Success
@@ -50,7 +50,7 @@ class CalendarUiStateTest {
 
     @Test
     fun entriesWithAnUnreadableDateAreNotShown() {
-        val payload = CalendarPayload(entries = listOf(dentist, CalendarEntry("not a date", "Broken")))
+        val payload = CalendarPayload(entries = listOf(dentist, CalendarEntry("broken", "not a date", "Broken")))
 
         val state = DocumentUiState.Success(payload).toCalendarUiState(canEdit = true) as CalendarUiState.Success
 

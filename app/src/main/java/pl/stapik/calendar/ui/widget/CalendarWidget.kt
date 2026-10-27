@@ -273,5 +273,4 @@ private fun formatDate(date: LocalDate): String =
         )
     )
 
-private fun entryId(entry: CalendarEntry): Long =
-    "${entry.date}|${entry.time}|${entry.name}|${entry.link}|${entry.color}".hashCode().toLong()
+private fun entryId(entry: CalendarEntry): Long = entry.id.hashCode().toLong()

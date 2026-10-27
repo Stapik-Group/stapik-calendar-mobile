@@ -18,8 +18,8 @@ import pl.stapik.common.model.LocalDocument
 
 class LegacyCalendarSplitTest {
     private val clock = Clock.fixed(Instant.parse("2026-03-01T12:00:00Z"), ZoneOffset.UTC)
-    private val dentist = CalendarEntry("2026-01-02", "Dentist")
-    private val gym = CalendarEntry("2025-12-31", "Gym")
+    private val dentist = CalendarEntry("dentist", "2026-01-02", "Dentist")
+    private val gym = CalendarEntry("gym", "2025-12-31", "Gym")
     private val stores = mutableMapOf<Int, FakeDocumentStore>()
 
     private fun store(year: Int) = stores.getOrPut(year) { FakeDocumentStore() }
@@ -85,7 +85,7 @@ class LegacyCalendarSplitTest {
 
     @Test
     fun entriesWithoutADateGoToTheCurrentYear() = runBlocking {
-        val broken = CalendarEntry("not a date", "Broken")
+        val broken = CalendarEntry("broken", "not a date", "Broken")
 
         split(FakeDocumentStore(LocalDocument(envelopeOf(broken)))).run()
 
@@ -94,7 +94,7 @@ class LegacyCalendarSplitTest {
 
     @Test
     fun aDocumentThatAlreadyExistsIsCompletedNotReplaced() = runBlocking {
-        val barber = CalendarEntry("2026-02-02", "Barber")
+        val barber = CalendarEntry("barber", "2026-02-02", "Barber")
         store(2026).document = LocalDocument(envelopeOf(barber, dentist))
 
         split(FakeDocumentStore(LocalDocument(envelopeOf(dentist, gym)))).run()

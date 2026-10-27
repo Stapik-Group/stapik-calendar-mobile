@@ -4,10 +4,10 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class EntryDayOrderTest {
-    private val late = CalendarEntry("2026-01-02", "Late", time = "18:00")
-    private val early = CalendarEntry("2026-01-02", "Early", time = "08:15")
-    private val first = CalendarEntry("2026-01-02", "First")
-    private val second = CalendarEntry("2026-01-02", "Second")
+    private val late = CalendarEntry("late", "2026-01-02", "Late", time = "18:00")
+    private val early = CalendarEntry("early", "2026-01-02", "Early", time = "08:15")
+    private val first = CalendarEntry("first", "2026-01-02", "First")
+    private val second = CalendarEntry("second", "2026-01-02", "Second")
 
     @Test
     fun entriesWithATimeComeFirstInTheOrderOfTheClock() {

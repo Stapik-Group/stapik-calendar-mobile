@@ -59,17 +59,17 @@ class CalendarViewModel(
         val oldYear = yearOf(old)
         val newYear = yearOf(new)
         if (oldYear == newYear) {
-            edit(oldYear) { edits.replace(it, old, new) }
+            edit(oldYear) { edits.replace(it, new) }
         } else {
             val moved = new.copy(unknownFields = old.unknownFields)
             launchSync {
-                controller.editDebounced(oldYear) { edits.remove(it, old) }
+                controller.editDebounced(oldYear) { edits.remove(it, old.id) }
                 controller.editDebounced(newYear) { edits.add(it, moved) }
             }
         }
     }
 
-    fun deleteEntry(entry: CalendarEntry) = edit(yearOf(entry)) { edits.remove(it, entry) }
+    fun deleteEntry(entry: CalendarEntry) = edit(yearOf(entry)) { edits.remove(it, entry.id) }
 
     fun flushPendingSync() = launchSync { controller.flushPendingSync() }
 

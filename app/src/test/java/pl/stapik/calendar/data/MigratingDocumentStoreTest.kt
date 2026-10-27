@@ -14,7 +14,7 @@ import pl.stapik.common.model.LocalDocument
 
 class MigratingDocumentStoreTest {
     private val cached = CachedCalendar(
-        entries = listOf(CalendarEntry("2026-01-02", "Dentist")),
+        entries = listOf(CalendarEntry("dentist", "2026-01-02", "Dentist")),
         updatedAt = "2026-01-01T10:00:00Z"
     )
 

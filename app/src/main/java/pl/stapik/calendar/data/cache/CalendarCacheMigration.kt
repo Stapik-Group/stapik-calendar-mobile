@@ -6,6 +6,7 @@ import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.CancellationException
 import pl.stapik.calendar.data.model.CalendarDocument
 import pl.stapik.calendar.data.model.CalendarPayload
+import pl.stapik.calendar.data.model.EntryIds
 import pl.stapik.common.model.CloudScope
 import pl.stapik.common.model.DocumentEnvelope
 import pl.stapik.common.model.LocalDocument
@@ -44,7 +45,7 @@ class CalendarCacheMigration(
     private fun toLocalDocument(cached: CachedCalendar): LocalDocument<DocumentEnvelope> {
         val modifiedAt = cached.modifiedAt?.let { runCatching { Instant.parse(it) }.getOrNull() }
         val stamp = (modifiedAt ?: clock.instant()).truncatedTo(ChronoUnit.SECONDS).toString()
-        val payload = CalendarPayload(entries = cached.entries, lastUpdate = stamp)
+        val payload = CalendarPayload(entries = EntryIds.withUniqueIds(cached.entries), lastUpdate = stamp)
         return LocalDocument(
             content = CalendarDocument.codec.encode(payload, DocumentEnvelope.empty(stamp), stamp),
             cloudBaseline = cached.updatedAt,

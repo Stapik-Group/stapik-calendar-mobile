@@ -17,8 +17,6 @@ android {
         versionCode = 3
         versionName = "1.4.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
         androidResources {
             localeFilters += listOf("en", "pl", "de")
         }
@@ -40,7 +38,7 @@ android {
     buildTypes {
         release {
             optimization {
-                enable = false
+                enable = true
             }
             if (keystoreFile != null) {
                 signingConfig = signingConfigs.getByName("release")
@@ -92,10 +90,6 @@ dependencies {
     implementation(libs.ui.theme)
 
     testImplementation(libs.junit)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(libs.androidx.junit)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }
